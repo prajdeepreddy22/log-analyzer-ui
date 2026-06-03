@@ -1,0 +1,46 @@
+<div class="pagination-bar">
+
+  <div class="page-meta">
+    <span>
+      Page {{ uploadStore.page() + 1 }} of {{ uploadStore.totalPages() || 1 }}
+    </span>
+
+    <span>
+      {{ uploadStore.totalElements() }} uploads
+    </span>
+  </div>
+
+  <div class="page-actions">
+
+    <select
+      class="size-select"
+      [value]="uploadStore.size()"
+      (change)="changeSize($event)"
+      aria-label="Uploads per page"
+    >
+      <option value="10">10</option>
+      <option value="20">20</option>
+      <option value="50">50</option>
+    </select>
+
+    <button
+      type="button"
+      class="page-btn"
+      [disabled]="!uploadStore.hasPreviousPage()"
+      (click)="previousPage()"
+    >
+      Prev
+    </button>
+
+    <button
+      type="button"
+      class="page-btn"
+      [disabled]="!uploadStore.hasNextPage()"
+      (click)="nextPage()"
+    >
+      Next
+    </button>
+
+  </div>
+
+</div>

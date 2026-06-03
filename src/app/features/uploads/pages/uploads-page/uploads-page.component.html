@@ -1,0 +1,83 @@
+<div class="uploads-page">
+
+  <!-- ===================== -->
+  <!-- HEADER -->
+  <!-- ===================== -->
+
+  <div class="page-header">
+
+    <div>
+
+      <h1 class="page-title">
+        Uploads
+      </h1>
+
+      <p class="page-subtitle">
+        Upload and process log files for AI-powered observability analysis
+      </p>
+
+    </div>
+
+  </div>
+
+  <!-- ===================== -->
+  <!-- DROPZONE -->
+  <!-- ===================== -->
+
+  <app-upload-dropzone />
+
+  @if (uploadStore.error()) {
+
+    <div class="error-banner">
+      {{ uploadStore.error() }}
+    </div>
+
+  }
+
+  <!-- ===================== -->
+  <!-- PROGRESS -->
+  <!-- ===================== -->
+
+  @if (uploadStore.uploading()) {
+
+    <app-upload-progress-card
+      [progress]="uploadStore.uploadProgress()"
+      [fileName]="uploadStore.uploadFileName() || 'Uploading log file...'"
+      (cancel)="uploadStore.cancelUpload()"
+    />
+
+  }
+
+  <!-- ===================== -->
+  <!-- TABLE -->
+  <!-- ===================== -->
+
+  <div class="section-header">
+
+    <h2>
+      Upload History
+    </h2>
+
+  </div>
+
+  @if (uploadStore.loading() && !uploadStore.hasUploads()) {
+
+    <div class="upload-skeleton">
+      <div class="skeleton-row"></div>
+      <div class="skeleton-row"></div>
+      <div class="skeleton-row"></div>
+    </div>
+
+  } @else if (uploadStore.hasUploads()) {
+
+    <app-upload-history-table />
+
+    <app-upload-pagination />
+
+  } @else {
+
+    <app-upload-empty-state />
+
+  }
+
+</div>

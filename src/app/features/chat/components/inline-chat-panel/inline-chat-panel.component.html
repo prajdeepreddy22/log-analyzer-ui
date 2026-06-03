@@ -1,0 +1,71 @@
+<div class="chat-panel">
+
+  <div class="chat-header">
+
+    <div>
+      <div class="title">
+        AI Debugging Assistant
+      </div>
+
+      <div class="subtitle">
+        Context: upload {{ uploadId().slice(0, 8) }}
+      </div>
+    </div>
+
+    <button
+      type="button"
+      class="clear-btn"
+      (click)="clearChat()"
+    >
+      Clear
+    </button>
+
+  </div>
+
+  <div class="messages">
+
+    @if (messages().length === 0) {
+
+      <div class="empty-state">
+
+        <div class="empty-kicker">
+          Chat
+        </div>
+
+        <div class="empty-title">
+          Ask about this upload
+        </div>
+
+        <div class="empty-subtitle">
+          Investigate root cause, stack traces, failed services, and fixes.
+        </div>
+
+      </div>
+    }
+
+    @for (
+      message of messages();
+      track message.id
+    ) {
+
+      <app-chat-message-bubble
+        [message]="message"
+        [uploadId]="uploadId()"
+      />
+
+    }
+
+  </div>
+
+  @if (chatStore.error()) {
+    <div class="chat-error">
+      {{ chatStore.error() }}
+    </div>
+  }
+
+  <app-chat-input
+    [disabled]="chatStore.busy()"
+    (sendMessage)="sendMessage($event)"
+  />
+
+</div>

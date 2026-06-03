@@ -1,0 +1,26 @@
+.log-empty-state {
+  padding: 28px;
+
+  background: var(--bg2);
+
+  border-top: 1px solid var(--border);
+}
+
+.empty-kicker {
+  color: var(--text3);
+
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 700;
+
+  text-transform: uppercase;
+}
+
+.empty-title {
+  margin-top: 8px;
+
+  color: var(--text);
+
+  font-size: 16px;
+  font-weight: 700;
+}

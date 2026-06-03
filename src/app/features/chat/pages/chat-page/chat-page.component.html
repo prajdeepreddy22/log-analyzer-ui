@@ -1,0 +1,124 @@
+<div class="chat-workspace">
+
+  <div class="chat-toolbar">
+
+    <select
+      class="upload-select"
+      aria-label="Select upload context"
+      [value]="selectedUploadId()"
+      (change)="selectUploadFromEvent($event)"
+    >
+      @if (loadingUploads()) {
+        <option value="">
+          Loading uploads...
+        </option>
+      } @else if (!uploadStore.hasUploads()) {
+        <option value="">
+          No completed uploads
+        </option>
+      } @else {
+        @for (
+          upload of uploadStore.uploads();
+          track upload.uploadId
+        ) {
+          <option [value]="upload.uploadId">
+            {{ upload.fileName }}
+          </option>
+        }
+      }
+    </select>
+
+    <span class="badge badge-green">
+      {{ selectedUpload()?.status || 'NO UPLOAD' }}
+    </span>
+
+    @if (selectedUpload()) {
+
+      <span class="badge metric-badge">
+        {{ selectedUpload()?.totalLogs ?? '-' }} logs
+      </span>
+
+      <span class="badge error-badge">
+        {{ selectedUpload()?.errorCount ?? 0 }} errors
+      </span>
+
+    }
+
+    <span class="badge badge-purple">
+      {{ chatStore.streaming() ? 'SSE STREAMING' : chatStore.loading() ? 'REQUESTING' : 'READY' }}
+    </span>
+
+    <label class="stream-toggle">
+      <input
+        type="checkbox"
+        aria-label="Enable streaming responses"
+        [checked]="streamingEnabled()"
+        [disabled]="chatStore.busy()"
+        (change)="toggleStreamingFromEvent($event)"
+      />
+      Stream
+    </label>
+
+    @if (chatStore.streaming()) {
+      <button
+        class="btn stop-btn"
+        type="button"
+        aria-label="Stop streaming response"
+        (click)="stopGeneration()"
+      >
+        Stop
+      </button>
+    }
+
+    <button
+      class="btn chat-source-badge"
+      type="button"
+      aria-label="Clear chat history"
+      (click)="clearChat()"
+    >
+      Clear
+    </button>
+
+  </div>
+
+  <div class="chat-page">
+
+    <div class="full-chat-history">
+
+      <app-chat-message-list
+        [uploadId]="selectedUploadId()"
+        (promptSelected)="sendMessage($event)"
+      />
+
+    </div>
+
+    <div class="full-chat-input">
+
+      <app-chat-input
+        [disabled]="
+          !selectedUploadId() ||
+          chatStore.busy()
+        "
+        (sendMessage)="sendMessage($event)"
+      />
+
+      @if (chatStore.error()) {
+        <div class="stream-hint error">
+          {{ chatStore.error() }}
+        </div>
+      }
+
+      <div class="stream-hint">
+        Context: {{ selectedUpload()?.fileName || 'select an upload' }}
+        @if (streamingEnabled()) {
+          - streaming via SSE
+        } @else {
+          - standard response
+        }
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

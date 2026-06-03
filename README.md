@@ -1,27 +1,64 @@
-# LogAnalyzerUi
+# LogAI Frontend
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 18.2.21.
+Angular 18 frontend for the GenAI-powered log analyzer and incident assistant.
 
-## Development server
+## Local Development
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+```bash
+npm install
+npm start
+```
 
-## Code scaffolding
+Development API URL:
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+```text
+http://localhost:8080/api
+```
 
-## Build
+## Verification
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+```bash
+npm run typecheck
+npm run typecheck:spec
+npm run test:ci
+```
 
-## Running unit tests
+## Production Build
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+```bash
+npm run build:prod
+```
 
-## Running end-to-end tests
+Production output:
 
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
+```text
+dist/log-analyzer-ui/browser
+```
 
-## Further help
+## Production API Routing
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+Production uses a relative API base URL:
+
+```text
+/api
+```
+
+For AWS S3 + CloudFront, configure CloudFront behaviors so:
+
+- `/api/*` forwards to the Spring Boot backend or API load balancer.
+- All frontend routes such as `/dashboard`, `/uploads`, `/logs/:uploadId`, and `/chat` fall back to `index.html`.
+- Static assets are served from the S3 frontend bucket.
+
+For a separate backend domain, update:
+
+```text
+src/environments/environment.production.ts
+```
+
+## Deployment Checklist
+
+- Run `npm run build:prod`.
+- Upload `dist/log-analyzer-ui/browser` to S3 or your static host.
+- Configure SPA fallback to `index.html`.
+- Configure `/api/*` proxying to the backend.
+- Verify JWT auth, upload flow, log viewer, analysis, chat streaming, and rate-limit status against the deployed backend.

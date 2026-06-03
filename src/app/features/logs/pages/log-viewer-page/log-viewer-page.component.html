@@ -1,0 +1,57 @@
+<div class="log-viewer-page">
+
+  <!-- ===================== -->
+  <!-- TOOLBAR -->
+  <!-- ===================== -->
+
+  <app-log-toolbar
+    [uploadId]="uploadId"
+  />
+
+  <!-- ===================== -->
+  <!-- STATS -->
+  <!-- ===================== -->
+
+  <app-log-stats-bar />
+
+  <!-- ===================== -->
+  <!-- CONTENT -->
+  <!-- ===================== -->
+
+  <div class="viewer-layout">
+
+    <!-- =================== -->
+    <!-- LOG TABLE -->
+    <!-- =================== -->
+
+    <div class="table-section">
+
+      <app-log-filters
+        [uploadId]="uploadId"
+      />
+
+      <app-log-table
+        [uploadId]="uploadId"
+      />
+
+      <app-log-pagination
+        [uploadId]="uploadId"
+      />
+
+    </div>
+
+    <!-- =================== -->
+    <!-- AI PANEL -->
+    <!-- =================== -->
+
+    <div class="ai-section">
+
+      <app-log-ai-panel
+        [uploadId]="uploadId"
+      />
+
+    </div>
+
+  </div>
+
+</div>

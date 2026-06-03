@@ -1,0 +1,109 @@
+<div class="table-wrapper">
+
+  <table class="uploads-table">
+
+    <thead>
+
+      <tr>
+        <th>Filename</th>
+        <th>Size</th>
+        <th>Uploaded At</th>
+        <th>Status</th>
+        <th>Total</th>
+        <th>Errors</th>
+        <th>Warnings</th>
+        <th>Actions</th>
+      </tr>
+
+    </thead>
+
+    <tbody>
+
+      @for (
+        upload of uploadStore.uploads();
+        track upload.uploadId
+      ) {
+
+        <tr>
+
+          <td class="file-name">
+            {{ upload.fileName }}
+          </td>
+
+          <td class="metric muted">
+            {{ formatSize(upload) }}
+          </td>
+
+          <td class="upload-time">
+            {{
+              upload.uploadTime
+                | date:'medium'
+            }}
+          </td>
+
+          <td>
+            <app-upload-status-badge
+              [status]="upload.status"
+            />
+          </td>
+
+          <td class="metric">
+            {{ upload.totalLogs ?? '-' }}
+          </td>
+
+          <td class="metric error-count">
+            {{ upload.errorCount ?? '-' }}
+          </td>
+
+          <td class="metric warn-count">
+            {{ upload.warnCount ?? '-' }}
+          </td>
+
+          <td>
+
+            <div class="actions">
+
+              <button
+                type="button"
+                [attr.aria-label]="'View logs for ' + upload.fileName"
+                [disabled]="
+                  upload.status !== UploadStatus.COMPLETED
+                "
+                (click)="openLogs(upload)"
+              >
+                View Logs
+              </button>
+
+              <button
+                type="button"
+                [attr.aria-label]="'Analyze ' + upload.fileName"
+                [disabled]="
+                  upload.status !== UploadStatus.COMPLETED
+                "
+                (click)="openAnalysis(upload)"
+              >
+                Analyze
+              </button>
+
+              <button
+                type="button"
+                class="danger"
+                [attr.aria-label]="'Delete ' + upload.fileName"
+                (click)="deleteUpload(upload)"
+              >
+                Delete
+              </button>
+
+            </div>
+
+          </td>
+
+        </tr>
+
+      }
+
+    </tbody>
+
+  </table>
+
+</div>

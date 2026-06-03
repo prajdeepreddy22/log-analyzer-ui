@@ -1,0 +1,194 @@
+<div class="table-wrapper">
+
+  <!-- HEADER -->
+
+  <div class="table-header">
+
+    <button
+      class="col sequence sortable"
+      type="button"
+      aria-label="Sort logs by sequence"
+      [attr.aria-sort]="ariaSort('logSequence')"
+      (click)="sort('logSequence')"
+    >
+      #
+      <span>{{ sortIndicator('logSequence') }}</span>
+    </button>
+
+    <button
+      class="col timestamp sortable"
+      type="button"
+      aria-label="Sort logs by timestamp"
+      [attr.aria-sort]="ariaSort('logTimestamp')"
+      (click)="sort('logTimestamp')"
+    >
+      Time
+      <span>{{ sortIndicator('logTimestamp') }}</span>
+    </button>
+
+    <button
+      class="col level sortable"
+      type="button"
+      aria-label="Sort logs by level"
+      [attr.aria-sort]="ariaSort('level')"
+      (click)="sort('level')"
+    >
+      Level
+      <span>{{ sortIndicator('level') }}</span>
+    </button>
+
+    <div class="col service">
+      Service
+    </div>
+
+    <div class="col message">
+      Message
+    </div>
+
+  </div>
+
+  @if (logStore.error()) {
+
+    <div class="error-state">
+      {{ logStore.error() }}
+    </div>
+
+  }
+
+  @if (logStore.loading()) {
+
+    <app-log-loading-state />
+
+  }
+
+  <!-- TABLE -->
+
+  @if (!logStore.loading()) {
+
+    <div class="log-list">
+
+      @for (
+        log of logStore.logs();
+        track trackByLog($index, log)
+      ) {
+
+        <div
+          class="log-row"
+          role="button"
+          tabindex="0"
+          [attr.aria-label]="logAriaLabel(log)"
+          [attr.aria-selected]="isSelected(log)"
+          [class.selected]="isSelected(log)"
+          [class.highlighted]="isHighlighted(log)"
+          [class.error-row]="log.level === 'ERROR' || log.level === 'FATAL'"
+          [class.warn-row]="log.level === 'WARN'"
+          [class.info-row]="log.level === 'INFO'"
+          (click)="selectLog(log)"
+          (keydown.enter)="selectLog(log)"
+          (keydown.space)="selectLog(log); $event.preventDefault()"
+        >
+
+          <!-- SEQUENCE -->
+
+          <div class="cell sequence">
+            {{ log.logSequence }}
+          </div>
+
+          <!-- TIMESTAMP -->
+
+          <div class="cell timestamp">
+            {{ log.logTimestamp }}
+          </div>
+
+          <!-- LEVEL -->
+
+          <div class="cell level">
+
+            <span
+              class="level-badge"
+              [ngClass]="getLevelClass(log.level)"
+            >
+              {{ log.level }}
+            </span>
+
+          </div>
+
+          <!-- SERVICE -->
+
+          <div class="cell service">
+            {{ log.serviceName }}
+          </div>
+
+          <!-- MESSAGE -->
+
+          <div class="cell message">
+
+            <span class="message-text">
+              {{ log.message }}
+            </span>
+
+          </div>
+
+        </div>
+      }
+
+    </div>
+
+  }
+
+  @if (logStore.selectedLog()) {
+
+    <section class="selected-log-detail">
+
+      <div class="selected-log-header">
+
+        <div>
+          <div class="detail-label">
+            Selected log
+          </div>
+
+          <div class="detail-meta">
+            #{{ logStore.selectedLog()?.logSequence }}
+            <span>{{ logStore.selectedLog()?.logTimestamp }}</span>
+            <span>{{ logStore.selectedLog()?.serviceName }}</span>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          class="close-detail"
+          (click)="clearSelection()"
+          aria-label="Close selected log"
+        >
+          Close
+        </button>
+
+      </div>
+
+      <pre class="detail-message">{{ logStore.selectedLog()?.message }}</pre>
+
+    </section>
+  }
+
+  <!-- EMPTY -->
+
+  @if (
+    !logStore.loading() &&
+    !logStore.error() &&
+    logStore.logs().length === 0
+  ) {
+
+    <div class="empty-state">
+
+      <div class="empty-title">
+        No logs found
+      </div>
+
+      <div class="empty-subtitle">
+        Try changing filters or upload another log file.
+      </div>
+
+    </div>
+  }
+
+</div>

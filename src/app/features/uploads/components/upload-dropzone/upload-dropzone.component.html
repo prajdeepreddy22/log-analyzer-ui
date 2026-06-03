@@ -1,0 +1,42 @@
+<div
+  class="dropzone"
+  [class.dragging]="isDragging()"
+>
+
+  <input
+    #fileInput
+    type="file"
+    hidden
+    accept=".log,.txt"
+    (change)="onFileSelected($event)"
+  />
+
+  <div class="content">
+
+    <div class="title">
+      Upload Log Files
+    </div>
+
+    <div class="description">
+      Drag & drop .log or .txt files here
+    </div>
+
+    <button
+      type="button"
+      class="upload-button"
+      (click)="fileInput.click()"
+    >
+      Select File
+    </button>
+
+    @if (error()) {
+
+      <div class="error">
+        {{ error() }}
+      </div>
+
+    }
+
+  </div>
+
+</div>

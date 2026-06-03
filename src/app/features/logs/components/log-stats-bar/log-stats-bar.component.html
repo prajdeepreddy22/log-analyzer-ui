@@ -1,0 +1,59 @@
+<div class="metrics-strip">
+
+  <!-- TOTAL -->
+
+  <div class="metric-item">
+
+    <div class="metric-label">
+      TOTAL
+    </div>
+
+    <div class="metric-value">
+      {{ logStore.stats()?.totalLogs || 0 }}
+    </div>
+
+  </div>
+
+  <!-- INFO -->
+
+  <div class="metric-item info">
+
+    <div class="metric-label">
+      INFO
+    </div>
+
+    <div class="metric-value">
+      {{ logStore.stats()?.infoCount || 0 }}
+    </div>
+
+  </div>
+
+  <!-- WARN -->
+
+  <div class="metric-item warn">
+
+    <div class="metric-label">
+      WARN
+    </div>
+
+    <div class="metric-value">
+      {{ logStore.stats()?.warnCount || 0 }}
+    </div>
+
+  </div>
+
+  <!-- ERROR -->
+
+  <div class="metric-item error">
+
+    <div class="metric-label">
+      ERROR
+    </div>
+
+    <div class="metric-value">
+      {{ logStore.stats()?.errorCount || 0 }}
+    </div>
+
+  </div>
+
+</div>

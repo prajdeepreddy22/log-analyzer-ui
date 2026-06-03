@@ -1,0 +1,89 @@
+.uploads-page {
+  display: flex;
+  flex-direction: column;
+
+  gap: 24px;
+
+  padding: 24px;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.page-title {
+  margin: 0;
+
+  font-size: 28px;
+  font-weight: 700;
+
+  color: var(--text);
+}
+
+.page-subtitle {
+  margin-top: 8px;
+
+  color: var(--text2);
+
+  font-size: 14px;
+}
+
+.section-header h2 {
+  margin: 0;
+
+  font-size: 18px;
+  font-weight: 700;
+
+  color: var(--text);
+}
+
+.error-banner {
+  padding: 12px 14px;
+
+  color: var(--red);
+  background: var(--red-bg);
+
+  border: 1px solid var(--red-border);
+  border-radius: var(--radius);
+
+  font-size: 13px;
+}
+
+.upload-skeleton {
+  display: grid;
+  gap: 1px;
+
+  overflow: hidden;
+
+  background: var(--border);
+
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+
+.skeleton-row {
+  height: 56px;
+
+  background:
+    linear-gradient(
+      90deg,
+      var(--bg2),
+      var(--bg3),
+      var(--bg2)
+    );
+
+  animation: loading-shimmer 1.2s ease-in-out infinite;
+}
+
+@keyframes loading-shimmer {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}

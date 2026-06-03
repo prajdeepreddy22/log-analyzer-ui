@@ -1,0 +1,49 @@
+<div class="pagination-bar">
+
+  <div class="page-meta">
+    <span>
+      Page {{ logStore.page() + 1 }} of {{ logStore.totalPages() || 1 }}
+    </span>
+
+    <span>
+      {{ logStore.totalElements() }} logs
+    </span>
+  </div>
+
+  <div class="page-actions">
+
+    <select
+      class="size-select"
+      [value]="logStore.size()"
+      (change)="changeSize($event)"
+      aria-label="Rows per page"
+    >
+      <option value="20">20</option>
+      <option value="50">50</option>
+      <option value="100">100</option>
+    </select>
+
+    <button
+      type="button"
+      class="page-btn"
+      [disabled]="logStore.page() <= 0"
+      (click)="previousPage()"
+    >
+      Prev
+    </button>
+
+    <button
+      type="button"
+      class="page-btn"
+      [disabled]="
+        logStore.page() >= logStore.totalPages() - 1 ||
+        logStore.totalPages() === 0
+      "
+      (click)="nextPage()"
+    >
+      Next
+    </button>
+
+  </div>
+
+</div>

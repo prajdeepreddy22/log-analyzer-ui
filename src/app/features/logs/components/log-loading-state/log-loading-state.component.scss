@@ -1,0 +1,18 @@
+.log-loading-state {
+  display: grid;
+  gap: 1px;
+
+  background: var(--border);
+}
+
+.loading-row {
+  height: 42px;
+
+  background:
+    linear-gradient(
+      90deg,
+      var(--bg2),
+      var(--bg3),
+      var(--bg2)
+    );
+}

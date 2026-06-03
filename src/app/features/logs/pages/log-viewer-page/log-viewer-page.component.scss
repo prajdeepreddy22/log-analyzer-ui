@@ -1,0 +1,75 @@
+:host {
+  display: block;
+  height: 100%;
+  min-height: 0;
+}
+
+.log-viewer-page {
+  display: flex;
+  flex-direction: column;
+
+  gap: 0;
+
+  padding: 0;
+
+  height: 100%;
+  min-height: 0;
+
+  background: var(--bg);
+}
+
+.viewer-layout {
+  display: grid;
+
+  grid-template-columns:
+    minmax(0, 1fr)
+    288px;
+
+  gap: 0;
+
+  min-height: 0;
+
+  flex: 1;
+
+  border-top: 1px solid var(--border);
+}
+
+.table-section {
+  display: flex;
+  flex-direction: column;
+
+  min-width: 0;
+  min-height: 0;
+
+  background: var(--bg2);
+
+  overflow: hidden;
+}
+
+.ai-section {
+  min-height: 0;
+
+  border-left: 1px solid var(--border);
+
+  background: var(--bg2);
+
+  overflow: hidden;
+}
+
+@media (max-width: 1200px) {
+
+  .viewer-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .ai-section {
+    min-height: 320px;
+  }
+}
+
+@media (max-width: 768px) {
+
+  .log-viewer-page {
+    padding: 0;
+  }
+}

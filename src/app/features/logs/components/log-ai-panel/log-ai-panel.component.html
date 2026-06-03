@@ -1,0 +1,241 @@
+<div class="ai-panel">
+
+  <div class="tabs">
+
+    <button
+      class="tab"
+      type="button"
+      [class.active]="activeTab() === 'root-cause'"
+      (click)="setTab('root-cause')"
+    >
+      Root Cause
+    </button>
+
+    <button
+      class="tab"
+      type="button"
+      [class.active]="activeTab() === 'chat'"
+      (click)="setTab('chat')"
+    >
+      Chat
+    </button>
+
+  </div>
+
+  @if (activeTab() === 'root-cause') {
+
+    <div class="analysis-status-row">
+
+      <span
+        class="status-pill"
+        [class.completed]="analysisStore.isCompleted()"
+        [class.failed]="analysisStore.isFailed()"
+        [class.processing]="analysisStore.isProcessing()"
+      >
+        {{ analysisStore.status() || 'NOT RUN' }}
+      </span>
+
+      @if (hasCompletedAnalysis()) {
+
+        <button
+          class="mini-action"
+          type="button"
+          [disabled]="analysisStore.isProcessing()"
+          (click)="retryAnalysis()"
+        >
+          Re-run
+        </button>
+
+      }
+
+    </div>
+  }
+
+  @if (analysisStore.error()) {
+
+    <div class="error-state">
+      {{ analysisStore.error() }}
+    </div>
+  }
+
+  @if (
+    activeTab() === 'root-cause' &&
+    analysisStore.isProcessing()
+  ) {
+
+    <div class="loading-state">
+      <div class="loader-dot"></div>
+      {{ progressMessage() }}
+    </div>
+  }
+
+  @if (
+    activeTab() === 'root-cause' &&
+    hasCompletedAnalysis() &&
+    !analysisStore.isProcessing()
+  ) {
+
+    <div class="analysis-content">
+
+      <section class="analysis-block">
+
+        <div class="block-label">
+          Summary
+        </div>
+
+        <p class="block-text strong">
+          {{ analysisStore.analysis()?.summary || '-' }}
+        </p>
+
+      </section>
+
+      <section class="analysis-block">
+
+        <div class="block-label">
+          Root Cause
+        </div>
+
+        <p class="block-text strong">
+          {{ analysisStore.analysis()?.rootCause || '-' }}
+        </p>
+
+      </section>
+
+      <section class="analysis-block">
+
+        <div class="block-label">
+          Developer Mistake
+        </div>
+
+        <p class="block-text">
+          {{ analysisStore.analysis()?.developerMistake || '-' }}
+        </p>
+
+      </section>
+
+      <section class="analysis-block">
+
+        <div class="block-label">
+          Fix Suggestion
+        </div>
+
+        <p class="block-text">
+          {{ analysisStore.analysis()?.fixSuggestion || '-' }}
+        </p>
+
+      </section>
+
+      <section class="analysis-block">
+
+        <div class="block-label">
+          Severity
+        </div>
+
+        <div class="severity-row">
+
+          @for (
+            block of [1, 2, 3, 4, 5];
+            track block
+          ) {
+
+            <span
+              class="severity-block"
+              [class.active]="
+                isSeverityActive(
+                  block,
+                  analysisStore.analysis()?.severityScore
+                )
+              "
+            ></span>
+          }
+
+        </div>
+
+        <div class="severity-label">
+          {{ getSeverityLabel(analysisStore.analysis()?.severityScore) }}
+          / {{ analysisStore.analysis()?.severityScore || 0 }}
+        </div>
+
+      </section>
+
+      <section class="analysis-block">
+
+        <div class="block-label">
+          Code Fix
+        </div>
+
+        <pre class="code-block">{{ analysisStore.analysis()?.codeFix || '-' }}</pre>
+
+      </section>
+
+      @if (selectedLog()) {
+
+        <section class="selected-log-card">
+
+          <div class="selected-header">
+
+            <div class="block-label">
+              Selected Log
+            </div>
+
+            <div
+              class="selected-level"
+              [ngClass]="selectedLog()?.level?.toLowerCase()"
+            >
+              {{ selectedLog()?.level }}
+            </div>
+
+          </div>
+
+          <div class="selected-time">
+            {{ selectedLog()?.logTimestamp }}
+          </div>
+
+          <pre class="selected-message">{{ selectedLog()?.message }}</pre>
+
+        </section>
+      }
+
+    </div>
+  }
+
+  @if (
+    activeTab() === 'root-cause' &&
+    !analysisStore.isProcessing() &&
+    !hasCompletedAnalysis()
+  ) {
+
+    <div class="analysis-empty-state">
+
+      <div class="empty-kicker">
+        No Analysis Yet
+      </div>
+
+      <div class="empty-title">
+        Run incident analysis
+      </div>
+
+      <div class="empty-copy">
+        Generate root cause, developer mistake, fix suggestion, code fix, and severity score for this upload.
+      </div>
+
+      <button
+        class="retry-btn"
+        type="button"
+        [disabled]="analysisStore.isProcessing()"
+        (click)="runAnalysis()"
+      >
+        Analyze Logs
+      </button>
+
+    </div>
+  }
+
+  @if (activeTab() === 'chat') {
+
+    <app-inline-chat-panel
+      [uploadId]="uploadId()"
+    />
+  }
+
+</div>

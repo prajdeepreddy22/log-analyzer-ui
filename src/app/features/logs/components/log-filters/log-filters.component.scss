@@ -1,0 +1,155 @@
+.filters-bar {
+  display: flex;
+  align-items: center;
+
+  gap: 6px;
+
+  padding: 10px 14px;
+
+  background: var(--bg3);
+
+  border-bottom: 1px solid var(--border);
+
+  overflow-x: auto;
+}
+
+.level-chips {
+  display: flex;
+  align-items: center;
+
+  gap: 6px;
+}
+
+.chip {
+  padding: 4px 10px;
+
+  border: 1px solid var(--border);
+  border-radius: 20px;
+
+  background: transparent;
+
+  color: var(--text3);
+
+  cursor: pointer;
+
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 500;
+
+  white-space: nowrap;
+}
+
+.chip.active {
+  background: var(--purple-bg);
+
+  border-color: var(--purple-border);
+
+  color: var(--purple);
+}
+
+.chip.error {
+  border-color: var(--red-border);
+
+  color: var(--red);
+}
+
+.chip.warn {
+  border-color: var(--amber-border);
+
+  color: var(--amber);
+}
+
+.chip.info {
+  border-color: var(--blue-border);
+
+  color: var(--blue);
+}
+
+.search-wrapper {
+  flex: 1;
+  min-width: 180px;
+}
+
+.service-wrapper {
+  width: 150px;
+  flex-shrink: 0;
+}
+
+.search-input {
+  width: 100%;
+
+  padding: 4px 10px;
+
+  background: var(--bg4);
+
+  border: 1px solid var(--border);
+  border-radius: 6px;
+
+  color: var(--text);
+
+  font-family: var(--mono);
+  font-size: 12px;
+
+  outline: none;
+}
+
+.search-input::placeholder {
+  color: var(--text3);
+}
+
+.search-btn,
+.clear-btn {
+  padding: 5px 12px;
+
+  border: 1px solid var(--border2);
+  border-radius: 6px;
+
+  background: transparent;
+
+  color: var(--text2);
+
+  font-size: 11px;
+  font-weight: 500;
+
+  cursor: pointer;
+}
+
+.clear-btn:disabled {
+  color: var(--text3);
+
+  cursor: not-allowed;
+}
+
+@media (max-width: 900px) {
+  .filters-bar {
+    align-items: stretch;
+    flex-wrap: wrap;
+  }
+
+  .level-chips {
+    width: 100%;
+  }
+
+  .service-wrapper {
+    width: 130px;
+  }
+}
+
+@media (max-width: 768px) {
+
+  .filters-bar {
+    padding: 8px 10px;
+  }
+
+  .search-wrapper,
+  .service-wrapper {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .search-btn,
+  .clear-btn {
+    flex: 1;
+    min-height: 34px;
+  }
+}

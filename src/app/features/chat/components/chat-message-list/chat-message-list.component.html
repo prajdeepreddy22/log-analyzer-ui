@@ -1,0 +1,68 @@
+<div
+  #scrollContainer
+  class="message-list"
+>
+
+  @if (!chatStore.hasMessages()) {
+
+    <div class="empty-state">
+
+      <div class="empty-kicker">
+        Chat Workspace
+      </div>
+
+      <h2>
+        Ask AI about your incidents
+      </h2>
+
+      <p>
+        Investigate root causes, stack traces, failed services, and suggested fixes.
+      </p>
+
+      <div class="suggestions">
+
+        <button
+          class="suggestion-chip"
+          type="button"
+          [disabled]="!uploadId() || chatStore.busy()"
+          (click)="usePrompt('Why did the service fail?')"
+        >
+          Why did the API fail?
+        </button>
+
+        <button
+          class="suggestion-chip"
+          type="button"
+          [disabled]="!uploadId() || chatStore.busy()"
+          (click)="usePrompt('Find the most likely root cause in these logs.')"
+        >
+          Find root cause
+        </button>
+
+        <button
+          class="suggestion-chip"
+          type="button"
+          [disabled]="!uploadId() || chatStore.busy()"
+          (click)="usePrompt('Analyze the stack trace and suggest a code-level fix.')"
+        >
+          Analyze stack trace
+        </button>
+
+      </div>
+
+    </div>
+  }
+
+  @for (
+    message of messages();
+    track trackByMessage($index, message)
+  ) {
+
+    <app-chat-message-bubble
+      [message]="message"
+      [uploadId]="uploadId()"
+    />
+
+  }
+
+</div>

@@ -1,0 +1,51 @@
+<div class="topbar">
+
+  <button
+    class="icon-btn mobile-menu"
+    type="button"
+    aria-label="Open navigation"
+    aria-controls="main-content"
+    (click)="layoutStore.toggleMobileDrawer()"
+  >
+    <span
+      class="menu-bars"
+      aria-hidden="true"
+    >
+      <span></span>
+      <span></span>
+      <span></span>
+    </span>
+  </button>
+
+  <div class="topbar-title">
+    GenAI Log Analyzer
+  </div>
+
+  <button
+    class="btn"
+    type="button"
+    aria-label="Open uploads page"
+    routerLink="/uploads"
+  >
+    Upload
+  </button>
+
+  <button
+    class="btn btn-primary"
+    type="button"
+    aria-label="Open chatbot"
+    routerLink="/chat"
+  >
+    Chat
+  </button>
+
+  <button
+    class="btn btn-danger"
+    type="button"
+    aria-label="Log out"
+    (click)="logout()"
+  >
+    Logout
+  </button>
+
+</div>

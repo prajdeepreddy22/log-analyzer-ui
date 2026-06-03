@@ -1,0 +1,35 @@
+<button
+  type="button"
+  class="log-card"
+  [class.clickable]="canNavigate()"
+  (click)="openLog()"
+>
+
+  <!-- ===================== -->
+  <!-- TOP -->
+  <!-- ===================== -->
+
+  <div class="top-row">
+
+    <div
+      class="level-badge"
+      [ngClass]="getLevelClass()"
+    >
+      {{ log().level }}
+    </div>
+
+    <div class="timestamp">
+      {{ log().timestamp }}
+    </div>
+
+  </div>
+
+  <!-- ===================== -->
+  <!-- MESSAGE -->
+  <!-- ===================== -->
+
+  <pre class="message">
+{{ log().message }}
+  </pre>
+
+</button>

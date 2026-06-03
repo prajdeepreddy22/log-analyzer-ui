@@ -1,0 +1,125 @@
+<div class="login-page">
+
+  <div class="login-card fade-in">
+
+    <!-- HEADER -->
+    <div class="login-header">
+
+      <div class="brand-row">
+
+        <div class="logo-badge">
+          LA
+        </div>
+
+        <div>
+          <div class="brand-name">
+            LogAI
+          </div>
+
+          <div class="brand-kicker">
+            incident intelligence
+          </div>
+        </div>
+
+      </div>
+
+      <h1>Sign in</h1>
+
+      <p>
+        Access your AI-powered log analysis workspace.
+      </p>
+
+    </div>
+
+    <!-- FORM -->
+    @if (errorMessage()) {
+      <div class="error-text">
+        {{ errorMessage() }}
+      </div>
+    }
+
+    <form
+      (submit)="onSubmit(); $event.preventDefault()"
+      class="login-form"
+    >
+
+      <!-- USERNAME -->
+      <div class="form-group">
+
+        <label>Username</label>
+
+        <input
+          type="text"
+          [value]="username()"
+          (input)="updateUsername($event)"
+          placeholder="Enter your username"
+        />
+
+        @if (usernameInvalid()) {
+          <div class="field-error">
+            Username is required
+          </div>
+        }
+
+      </div>
+
+      <!-- PASSWORD -->
+      <div class="form-group">
+
+        <label>Password</label>
+
+        <input
+          type="password"
+          [value]="password()"
+          (input)="updatePassword($event)"
+          placeholder="Enter your password"
+        />
+
+        @if (passwordInvalid()) {
+          <div class="field-error">
+            Minimum 6 characters required
+          </div>
+        }
+
+      </div>
+
+      <!-- SUBMIT -->
+      <button
+        type="submit"
+        class="btn-primary login-btn"
+        [disabled]="loading()"
+      >
+
+        @if (loading()) {
+
+          <span>Signing in...</span>
+
+        } @else {
+
+          <span>Sign In</span>
+
+        }
+
+      </button>
+
+    </form>
+
+    <!-- FOOTER -->
+    <div class="auth-footer">
+
+      <span>
+        Don't have an account?
+      </span>
+
+      <a
+        routerLink="/register"
+        class="auth-link"
+      >
+        Create Account
+      </a>
+
+    </div>
+
+  </div>
+
+</div>

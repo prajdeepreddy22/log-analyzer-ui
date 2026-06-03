@@ -1,0 +1,304 @@
+<section class="analysis-page">
+
+  <header class="analysis-header">
+
+    <div>
+      <p class="eyebrow">
+        AI ANALYSIS
+      </p>
+
+      <h1>
+        Analysis - {{ title() }}
+      </h1>
+
+      <div class="upload-selector-row">
+        <label for="analysis-upload-select">
+          Upload
+        </label>
+
+        <select
+          id="analysis-upload-select"
+          class="upload-select"
+          [value]="uploadId()"
+          [disabled]="uploadsLoading()"
+          (change)="selectUploadFromEvent($event)"
+        >
+          @if (uploadsLoading()) {
+            <option value="">
+              Loading completed uploads...
+            </option>
+          } @else if (!completedUploads().length) {
+            <option value="">
+              No completed uploads
+            </option>
+          } @else {
+            @for (
+              upload of completedUploads();
+              track upload.uploadId
+            ) {
+              <option [value]="upload.uploadId">
+                {{ upload.fileName }}
+              </option>
+            }
+          }
+        </select>
+      </div>
+    </div>
+
+    <div class="header-actions">
+
+      <span
+        class="status-pill"
+        [class.completed]="status() === 'COMPLETED'"
+        [class.failed]="status() === 'FAILED'"
+        [class.processing]="isProcessing()"
+      >
+        {{ status() }}
+      </span>
+
+      <button
+        type="button"
+        class="btn"
+        (click)="openLogs()"
+      >
+        View Logs
+      </button>
+
+      <button
+        type="button"
+        class="btn"
+        [disabled]="isProcessing()"
+        (click)="runAnalysis()"
+      >
+        @if (hasAnalysis()) {
+          Force Re-analyze
+        } @else {
+          Analyze
+        }
+      </button>
+
+      <button
+        type="button"
+        class="btn btn-primary"
+        (click)="openChat()"
+      >
+        Open Chat
+      </button>
+
+    </div>
+
+  </header>
+
+  @if (analysisStore.error()) {
+
+    <div class="state-card error">
+      {{ analysisStore.error() }}
+    </div>
+  }
+
+  @if (isProcessing()) {
+
+    <div class="state-card">
+      <span class="loader-dot"></span>
+      {{ progressMessage() }}
+    </div>
+  }
+
+  @if (hasAnalysis() && !isProcessing()) {
+
+    <div class="analysis-grid">
+
+      <article class="analysis-card full">
+
+        <div class="a-label">
+          Severity score
+        </div>
+
+        <div class="severity-display">
+
+          <div
+            class="sev-big"
+            [class.medium]="severityScore() === 3"
+            [class.low]="severityScore() > 0 && severityScore() < 3"
+          >
+            {{ severityScore() }}
+          </div>
+
+          <div>
+
+            <div class="sev-blocks">
+
+              @for (
+                block of [1, 2, 3, 4, 5];
+                track block
+              ) {
+
+                <span
+                  class="sev-b"
+                  [class.on]="isSeverityActive(block)"
+                  [class.off]="!isSeverityActive(block)"
+                ></span>
+              }
+
+            </div>
+
+            <div class="severity-copy">
+              {{ severityLabel() }} - {{ severityScore() >= 4 ? 'immediate attention required' : 'monitor and triage' }}
+            </div>
+
+          </div>
+
+        </div>
+
+      </article>
+
+      <article class="analysis-card">
+        <div class="a-label">
+          Summary
+        </div>
+
+        <p class="a-value">
+          {{ analysisStore.analysis()?.summary || '-' }}
+        </p>
+      </article>
+
+      <article class="analysis-card">
+        <div class="a-label">
+          Root cause
+        </div>
+
+        <p class="a-value">
+          {{ analysisStore.analysis()?.rootCause || '-' }}
+        </p>
+      </article>
+
+      <article class="analysis-card">
+        <div class="a-label">
+          Developer mistake
+        </div>
+
+        <p class="a-value">
+          {{ analysisStore.analysis()?.developerMistake || '-' }}
+        </p>
+      </article>
+
+      <article class="analysis-card">
+        <div class="a-label">
+          Fix suggestion
+        </div>
+
+        <p class="a-value">
+          {{ analysisStore.analysis()?.fixSuggestion || '-' }}
+        </p>
+      </article>
+
+      <article class="analysis-card full">
+        <div class="a-label">
+        Code fix
+      </div>
+
+        <pre class="code-snippet">{{ analysisStore.analysis()?.codeFix || '-' }}</pre>
+      </article>
+
+    </div>
+
+    <section class="history-panel">
+
+      <div class="history-header">
+
+        <div>
+          <div class="a-label">
+            History timeline
+          </div>
+
+          <p>
+            Recent AI analyses for this tenant.
+          </p>
+        </div>
+
+        @if (analysisStore.historyLoading()) {
+          <span class="sync-pill">
+            syncing
+          </span>
+        }
+
+      </div>
+
+      @if (analysisStore.history().length) {
+
+        <div class="timeline-list">
+
+          @for (
+            item of analysisStore.history();
+            track item.uploadId || item.createdAt || $index
+          ) {
+
+            <button
+              type="button"
+              class="timeline-item"
+              [class.active]="item.uploadId === uploadId()"
+              (click)="openHistoryItem(item.uploadId)"
+            >
+              <span
+                class="timeline-dot"
+                [class.high]="(item.severityScore ?? 0) >= 4"
+                [class.medium]="(item.severityScore ?? 0) === 3"
+              ></span>
+
+              <span class="timeline-main">
+                <strong>
+                  {{ item.fileName || item.uploadId || 'Analysis result' }}
+                </strong>
+
+                <span>
+                  {{ item.summary }}
+                </span>
+              </span>
+
+              <span class="timeline-score">
+                S{{ item.severityScore ?? 0 }}
+              </span>
+            </button>
+          }
+
+        </div>
+
+      } @else {
+
+        <div class="history-empty">
+          No previous analysis history returned by the backend yet.
+        </div>
+
+      }
+
+    </section>
+
+  } @else if (!isProcessing() && !analysisStore.error()) {
+
+    <div class="analysis-empty">
+
+      <div class="empty-label">
+        NO ANALYSIS YET
+      </div>
+
+      <h2>
+        Run AI incident analysis
+      </h2>
+
+      <p>
+        Generate summary, root cause, developer mistake, fix suggestion,
+        code-level fix, and severity score for this upload.
+      </p>
+
+      <button
+        type="button"
+        class="btn btn-primary"
+        (click)="runAnalysis()"
+      >
+        Analyze Logs
+      </button>
+
+    </div>
+  }
+
+</section>

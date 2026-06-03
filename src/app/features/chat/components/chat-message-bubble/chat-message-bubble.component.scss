@@ -1,0 +1,256 @@
+.message-row {
+  display: flex;
+  align-items: flex-start;
+
+  gap: 8px;
+}
+
+.message-row.user {
+  flex-direction: row-reverse;
+}
+
+.avatar {
+  display: none;
+}
+
+.bubble {
+  max-width: 85%;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 8px;
+
+  padding: 12px 14px;
+
+  background: var(--bg3);
+
+  border: 1px solid var(--border);
+  border-radius: 12px 12px 12px 2px;
+
+  color: var(--text);
+
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.message-row.user .bubble {
+  max-width: 72%;
+
+  align-self: flex-end;
+
+  background: var(--purple-bg);
+
+  border-color: var(--purple-border);
+  border-radius: 12px 12px 2px 12px;
+
+  color: var(--purple);
+}
+
+.bubble-meta {
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+}
+
+.role {
+  color: var(--text3);
+
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.timestamp {
+  color: var(--text3);
+
+  font-family: var(--mono);
+  font-size: 10px;
+}
+
+.content {
+  color: inherit;
+
+  white-space: pre-wrap;
+}
+
+.markdown-content {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.markdown-content :where(p, ul, ol, pre, blockquote) {
+  margin: 0 0 10px;
+}
+
+.markdown-content :where(p, ul, ol, pre, blockquote):last-child {
+  margin-bottom: 0;
+}
+
+.markdown-content :where(ul, ol) {
+  padding-left: 20px;
+}
+
+.markdown-content :where(li) {
+  margin: 3px 0;
+  padding-left: 2px;
+}
+
+.markdown-content :where(strong) {
+  color: var(--text);
+  font-weight: 700;
+}
+
+.markdown-content :where(br) {
+  display: block;
+  content: '';
+  margin-top: 3px;
+}
+
+.markdown-content :where(code) {
+  padding: 1px 4px;
+
+  color: var(--text);
+  background: var(--bg4);
+
+  border-radius: 4px;
+
+  font-family: var(--mono);
+  font-size: 12px;
+}
+
+.markdown-content :where(pre) {
+  padding: 10px;
+
+  overflow-x: auto;
+
+  background: var(--bg4);
+
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.markdown-content :where(blockquote) {
+  padding-left: 10px;
+  color: var(--text2);
+  border-left: 2px solid var(--purple-border);
+}
+
+.markdown-content :where(pre code) {
+  padding: 0;
+
+  background: transparent;
+}
+
+.typing {
+  display: inline-flex;
+  align-items: center;
+
+  gap: 3px;
+
+  padding: 4px 0;
+}
+
+.typing span {
+  width: 4px;
+  height: 4px;
+
+  border-radius: 50%;
+
+  background: var(--purple);
+
+  animation: typing 1.2s ease-in-out infinite;
+}
+
+.typing span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.typing span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+.badges {
+  display: flex;
+  align-items: center;
+
+  gap: 6px;
+
+  flex-wrap: wrap;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+
+  padding: 2px 8px;
+
+  border-radius: 4px;
+
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.confidence {
+  background: var(--green-bg);
+
+  border: 1px solid var(--green-border);
+
+  color: var(--green);
+}
+
+.source {
+  background: var(--blue-bg);
+
+  border: 1px solid var(--blue-border);
+
+  color: var(--blue);
+}
+
+.quality {
+  background: var(--purple-bg);
+
+  border: 1px solid var(--purple-border);
+
+  color: var(--purple);
+}
+
+.referenced-section {
+  margin-top: 4px;
+}
+
+.section-title {
+  margin-bottom: 5px;
+
+  color: var(--text3);
+
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.referenced-list {
+  display: flex;
+  flex-direction: column;
+
+  gap: 4px;
+}
+
+@keyframes typing {
+  0%,
+  100% {
+    opacity: 0.3;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}

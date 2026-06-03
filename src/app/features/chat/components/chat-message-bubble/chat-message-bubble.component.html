@@ -1,0 +1,171 @@
+<div
+  class="message-row"
+  [class.assistant]="isAssistant()"
+  [class.user]="!isAssistant()"
+>
+
+  <!-- ===================== -->
+  <!-- AVATAR -->
+  <!-- ===================== -->
+
+  @if (isAssistant()) {
+
+    <div class="avatar assistant-avatar">
+      AI
+    </div>
+
+  } @else {
+
+    <div class="avatar user-avatar">
+      You
+    </div>
+
+  }
+
+  <!-- ===================== -->
+  <!-- BUBBLE -->
+  <!-- ===================== -->
+
+  <div class="bubble">
+
+    <!-- TOP META -->
+
+    <div class="bubble-meta">
+
+      <div class="role">
+
+        @if (isAssistant()) {
+          AI Assistant
+        } @else {
+          You
+        }
+
+      </div>
+
+      <div class="timestamp">
+        {{ message().timestamp }}
+      </div>
+
+    </div>
+
+    <!-- CONTENT -->
+
+    <div class="content">
+
+      @if (message().loading) {
+
+        <div class="typing">
+
+          <span></span>
+          <span></span>
+          <span></span>
+
+        </div>
+
+      } @else if (isAssistant()) {
+
+        <div
+          class="markdown-content"
+          [innerHTML]="message().content | markdown"
+        ></div>
+
+      } @else {
+
+        {{ message().content }}
+
+      }
+
+    </div>
+
+    <!-- AI METADATA -->
+
+    @if (
+      isAssistant() &&
+      !message().loading
+    ) {
+
+      <!-- BADGES -->
+
+      <div class="badges">
+
+        @if (message().confidence) {
+
+          <div class="badge confidence">
+
+            {{ message().confidence }}%
+
+            confidence
+
+          </div>
+        }
+
+        @if (message().source) {
+
+          <div class="badge source">
+
+            {{ message().source }}
+
+          </div>
+        }
+
+        @if (message().quality) {
+
+          <div class="badge quality">
+
+            {{ message().quality }}
+
+          </div>
+        }
+
+      </div>
+
+      <!-- INSIGHTS -->
+
+      @if (
+        message().insights?.length
+      ) {
+
+        <app-insight-chips
+          [insights]="
+            message().insights || []
+          "
+        />
+
+      }
+
+      <!-- REFERENCED LOGS -->
+
+      @if (
+        message().referencedLogs?.length
+      ) {
+
+        <div class="referenced-section">
+
+          <div class="section-title">
+            Referenced Logs
+          </div>
+
+          <div class="referenced-list">
+
+            @for (
+              log of message().referencedLogs;
+              track log.id
+            ) {
+
+              <app-referenced-log-card
+                [log]="log"
+                [uploadId]="uploadId()"
+              />
+
+            }
+
+          </div>
+
+        </div>
+      }
+
+    }
+
+  </div>
+
+</div>

@@ -1,0 +1,139 @@
+<div class="sidebar">
+
+  <div class="logo-area">
+
+    <div class="logo-mark">
+
+      <div class="logo-icon">
+        LA
+      </div>
+
+      <div>
+
+        <div class="logo-text">
+          LogAI
+        </div>
+
+        <div class="logo-tagline">
+          incident intelligence
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <nav
+    class="nav-group"
+    aria-label="Main navigation"
+  >
+
+    <div class="nav-label">
+      Main
+    </div>
+
+    <a
+      routerLink="/dashboard"
+      routerLinkActive="active"
+      [routerLinkActiveOptions]="{ exact: true }"
+      class="nav-item"
+      (click)="layoutStore.closeMobileDrawer()"
+    >
+      <span class="nav-dot purple"></span>
+      Dashboard
+    </a>
+
+    <a
+      routerLink="/logs"
+      routerLinkActive="active"
+      [routerLinkActiveOptions]="{ exact: false }"
+      class="nav-item"
+      (click)="layoutStore.closeMobileDrawer()"
+    >
+      <span class="nav-dot blue"></span>
+      Log Viewer
+    </a>
+
+    <a
+      routerLink="/uploads"
+      routerLinkActive="active"
+      [routerLinkActiveOptions]="{ exact: false }"
+      class="nav-item"
+      (click)="layoutStore.closeMobileDrawer()"
+    >
+      <span class="nav-dot green"></span>
+      Uploads
+    </a>
+
+  </nav>
+
+  <nav
+    class="nav-group"
+    aria-label="AI tools navigation"
+  >
+
+    <div class="nav-label">
+      AI Tools
+    </div>
+
+    <a
+      routerLink="/analysis"
+      routerLinkActive="active"
+      [routerLinkActiveOptions]="{ exact: false }"
+      class="nav-item"
+      (click)="layoutStore.closeMobileDrawer()"
+    >
+      <span class="nav-dot amber"></span>
+      Analysis
+    </a>
+
+    <a
+      routerLink="/chat"
+      routerLinkActive="active"
+      [routerLinkActiveOptions]="{ exact: false }"
+      class="nav-item"
+      (click)="layoutStore.closeMobileDrawer()"
+    >
+      <span class="nav-dot purple"></span>
+      Chatbot
+    </a>
+
+    <a
+      routerLink="/rate-limit"
+      routerLinkActive="active"
+      [routerLinkActiveOptions]="{ exact: true }"
+      class="nav-item"
+      (click)="layoutStore.closeMobileDrawer()"
+    >
+      <span class="nav-dot gray"></span>
+      Rate Limits
+    </a>
+
+  </nav>
+
+  <div class="sidebar-footer">
+
+    <div class="user-row">
+
+      <div class="avatar">
+        {{ authStore.initials() }}
+      </div>
+
+      <div class="user-info">
+
+        <div class="name">
+          {{ authStore.displayName() }}
+        </div>
+
+        <div class="role">
+          authenticated
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

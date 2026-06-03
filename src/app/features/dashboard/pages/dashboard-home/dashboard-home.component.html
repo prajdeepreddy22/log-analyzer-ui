@@ -1,0 +1,251 @@
+<div class="dashboard-page">
+
+  <div class="dashboard-header">
+
+    <div>
+
+      <h1>
+        Dashboard
+      </h1>
+
+      <p>
+        Operational upload, incident, and AI quota overview from backend APIs.
+      </p>
+
+    </div>
+
+    <div class="header-actions">
+
+      <div class="system-badge">
+        {{ loading() ? 'Loading' : 'API data' }}
+      </div>
+
+      <button
+        class="upload-btn"
+        routerLink="/uploads"
+      >
+        Upload Log
+      </button>
+
+      <button
+        class="secondary-btn"
+        routerLink="/chat"
+      >
+        Open Chat
+      </button>
+
+    </div>
+
+  </div>
+
+  @if (loading()) {
+
+    <div class="metrics-grid">
+      <div class="metric-card skeleton-card"></div>
+      <div class="metric-card skeleton-card"></div>
+      <div class="metric-card skeleton-card"></div>
+      <div class="metric-card skeleton-card"></div>
+    </div>
+
+  } @else {
+
+    <div class="metrics-grid">
+
+      <div class="metric-card">
+        <span class="metric-label">total uploads</span>
+        <h2>{{ totalUploads() }}</h2>
+      </div>
+
+      <div class="metric-card">
+        <span class="metric-label">completed uploads</span>
+        <h2 class="success">{{ completedUploads() }}</h2>
+      </div>
+
+      <div class="metric-card">
+        <span class="metric-label">known errors</span>
+        <h2 class="danger">{{ knownErrors() }}</h2>
+      </div>
+
+      <div class="metric-card">
+        <span class="metric-label">analyses run</span>
+        <h2 class="warning">
+          {{ analysesRun() }}
+        </h2>
+      </div>
+
+    </div>
+
+  }
+
+  <div class="dashboard-grid">
+
+    <div class="section">
+
+      <div class="section-title">
+        RECENT UPLOADS
+      </div>
+
+      <div class="analysis-list">
+
+        @if (loading()) {
+
+          <div class="analysis-item skeleton-line"></div>
+          <div class="analysis-item skeleton-line"></div>
+          <div class="analysis-item skeleton-line"></div>
+
+        } @else {
+
+          @for (
+            upload of uploads();
+            track upload.uploadId
+          ) {
+
+            <a
+              class="analysis-item"
+              [routerLink]="['/logs', upload.uploadId]"
+            >
+
+              <div class="analysis-left">
+
+                <div
+                  class="severity"
+                  [class.sev-4]="(upload.errorCount || 0) > 0"
+                  [class.sev-3]="(upload.errorCount || 0) === 0"
+                >
+                  {{ upload.status }}
+                </div>
+
+                <div>
+                  <div class="analysis-name">
+                    {{ upload.fileName }}
+                  </div>
+
+                  <div class="analysis-meta">
+                    {{ upload.totalLogs ?? '-' }} logs /
+                    {{ upload.errorCount ?? 0 }} errors /
+                    {{ upload.warnCount ?? 0 }} warnings
+                  </div>
+                </div>
+
+              </div>
+
+              <div class="analysis-right">
+
+                <div class="status completed">
+                  {{ formatSize(upload) }}
+                </div>
+
+                <div class="date">
+                  {{ upload.uploadTime | date:'yyyy-MM-dd' }}
+                </div>
+
+              </div>
+
+            </a>
+          } @empty {
+
+            <div class="analysis-item empty-line">
+              <div class="analysis-name">
+                No uploads returned by backend.
+              </div>
+            </div>
+          }
+
+        }
+
+      </div>
+
+    </div>
+
+    <div class="section">
+
+      <div class="section-title">
+        AI INCIDENTS
+      </div>
+
+      <div class="incident-summary">
+
+        <div class="incident-number danger">
+          {{ highSeverityAnalyses() }}
+        </div>
+
+        <div>
+          <div class="incident-title">
+            high severity analyses
+          </div>
+
+          <div class="incident-subtitle">
+            {{ knownWarnings() }} warnings observed in recent uploads
+          </div>
+        </div>
+
+      </div>
+
+      <div class="severity-bars">
+
+        <div class="bar-row">
+          <span>LOW</span>
+          <div class="bar-track">
+            <div
+              class="bar-fill low"
+              [style.width.%]="severityBuckets().low * 20"
+            ></div>
+          </div>
+          <strong>{{ severityBuckets().low }}</strong>
+        </div>
+
+        <div class="bar-row">
+          <span>MED</span>
+          <div class="bar-track">
+            <div
+              class="bar-fill medium"
+              [style.width.%]="severityBuckets().medium * 20"
+            ></div>
+          </div>
+          <strong>{{ severityBuckets().medium }}</strong>
+        </div>
+
+        <div class="bar-row">
+          <span>HIGH</span>
+          <div class="bar-track">
+            <div
+              class="bar-fill high"
+              [style.width.%]="severityBuckets().high * 20"
+            ></div>
+          </div>
+          <strong>{{ severityBuckets().high }}</strong>
+        </div>
+
+      </div>
+
+      <div class="quota-card">
+
+        <div class="section-title compact">
+          RATE LIMIT
+        </div>
+
+        <div class="quota-line">
+          <span>Minute</span>
+          <strong>
+            {{ rateLimitStore.status()?.minuteUsage ?? 0 }}
+            /
+            {{ rateLimitStore.status()?.minuteLimit ?? 0 }}
+          </strong>
+        </div>
+
+        <div class="quota-line">
+          <span>Daily</span>
+          <strong>
+            {{ rateLimitStore.status()?.dailyUsage ?? 0 }}
+            /
+            {{ rateLimitStore.status()?.dailyLimit ?? 0 }}
+          </strong>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

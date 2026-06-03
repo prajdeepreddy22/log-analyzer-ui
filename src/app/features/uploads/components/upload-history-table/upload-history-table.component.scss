@@ -1,0 +1,126 @@
+.table-wrapper {
+  overflow-x: auto;
+
+  background: var(--bg2);
+
+  border: 1px solid var(--border);
+
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+}
+
+.uploads-table {
+  width: 100%;
+  min-width: 920px;
+
+  border-collapse: collapse;
+}
+
+thead {
+  background: var(--bg3);
+}
+
+th {
+  padding: 16px;
+
+  text-align: left;
+
+  font-size: 13px;
+  font-weight: 700;
+
+  color: var(--text2);
+
+  border-bottom: 1px solid var(--border);
+}
+
+td {
+  padding: 16px;
+
+  border-bottom: 1px solid var(--border);
+
+  color: var(--text);
+}
+
+tbody tr {
+  transition: background 0.2s ease;
+}
+
+tbody tr:hover {
+  background: var(--bg3);
+}
+
+.file-name {
+  font-family: var(--mono);
+
+  font-size: 13px;
+}
+
+.upload-time {
+  color: var(--text2);
+
+  font-size: 13px;
+}
+
+.metric {
+  font-family: var(--mono);
+  font-size: 12px;
+}
+
+.muted {
+  color: var(--text3);
+}
+
+.error-count {
+  color: var(--red);
+}
+
+.warn-count {
+  color: var(--amber);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.actions button {
+  padding: 8px 12px;
+
+  border: 1px solid var(--border2);
+
+  border-radius: var(--radius);
+
+  background: transparent;
+
+  color: var(--text2);
+
+  font-size: 12px;
+
+  cursor: pointer;
+
+  transition: var(--transition);
+}
+
+.actions button:hover:not(:disabled) {
+  background: var(--bg4);
+
+  color: var(--text);
+}
+
+.actions button:disabled {
+  opacity: 0.45;
+
+  cursor: not-allowed;
+}
+
+.actions .danger {
+  color: var(--red);
+
+  border-color: var(--red-border);
+}
+
+.actions .danger:hover:not(:disabled) {
+  background: var(--red-bg);
+
+  color: var(--red);
+}

@@ -1,0 +1,49 @@
+<div class="toolbar">
+
+  <!-- ===================== -->
+  <!-- LEFT -->
+  <!-- ===================== -->
+
+  <div class="toolbar-left">
+
+    <h2 class="title">
+      {{ title() }}
+    </h2>
+
+  </div>
+
+  <!-- ===================== -->
+  <!-- RIGHT -->
+  <!-- ===================== -->
+
+  <div class="toolbar-actions">
+
+    <span class="status-badge">
+      {{ status() }}
+    </span>
+
+    <button
+      class="analyze-btn"
+      type="button"
+      [disabled]="analyzing()"
+      (click)="analyze()"
+    >
+      @if (analyzing()) {
+        Processing...
+      } @else {
+        Analyze
+      }
+    </button>
+
+    <button
+      class="export-btn"
+      type="button"
+      [disabled]="!logStore.hasLogs()"
+      (click)="exportLogs()"
+    >
+      Export
+    </button>
+
+  </div>
+
+</div>

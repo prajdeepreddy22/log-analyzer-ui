@@ -1,0 +1,254 @@
+<div class="rate-limit-page">
+
+  <header class="rate-header">
+
+    <div>
+
+      <p class="eyebrow">
+        AI QUOTA
+      </p>
+
+      <h1>
+        Rate limits
+      </h1>
+
+    </div>
+
+    <div class="header-actions">
+
+      @if (rateLimitStore.refreshing() && !rateLimitStore.loading()) {
+        <span class="sync-label">
+          syncing
+        </span>
+      }
+
+      @if (rateLimitStore.status()) {
+        <span
+          class="status-pill"
+          [class.blocked]="rateLimitStore.status()?.blocked"
+          [class.warning]="
+            rateLimitStore.minuteWarning() ||
+            rateLimitStore.dailyWarning()
+          "
+        >
+          {{ rateLimitStore.quotaStateLabel() }}
+        </span>
+      }
+
+      <button
+        type="button"
+        class="refresh-button"
+        (click)="rateLimitStore.refreshNow()"
+        [disabled]="rateLimitStore.refreshing()"
+      >
+        Refresh
+      </button>
+
+    </div>
+
+  </header>
+
+  @if (rateLimitStore.loading()) {
+
+    <section class="rl-grid loading-grid">
+
+      <div class="rl-card skeleton-card"></div>
+
+      <div class="rl-card skeleton-card"></div>
+
+    </section>
+
+  } @else if (rateLimitStore.unavailable()) {
+
+    <section class="state-card">
+
+      <div class="state-title">
+        Rate-limit endpoint unavailable
+      </div>
+
+      <p>
+        The page is ready, but the backend did not return
+        <span>/rate-limit/status</span>.
+      </p>
+
+      <button
+        type="button"
+        class="refresh-button retry-inline"
+        (click)="rateLimitStore.refreshNow()"
+        [disabled]="rateLimitStore.refreshing()"
+      >
+        Retry
+      </button>
+
+    </section>
+
+  } @else {
+
+    <section class="rl-grid">
+
+      <article class="rl-card">
+
+        <div class="rl-label">
+          MINUTE WINDOW
+        </div>
+
+        <div class="usage-row">
+
+          <strong>
+            {{ rateLimitStore.status()?.minuteUsage ?? 0 }}
+          </strong>
+
+          <span>
+            / {{ rateLimitStore.status()?.minuteLimit ?? 0 }} requests
+          </span>
+
+        </div>
+
+        <div class="rl-bar-track">
+          <div
+            class="rl-bar-fill minute"
+            [class.warning]="rateLimitStore.minuteWarning()"
+            [class.blocked]="rateLimitStore.status()?.blocked"
+            [style.width.%]="rateLimitStore.minutePercent()"
+          ></div>
+        </div>
+
+        <div class="rl-numbers">
+          <span>{{ rateLimitStore.minutePercent() }}% used</span>
+          <span>{{ rateLimitStore.remainingMinute() }} left</span>
+        </div>
+
+        <div class="reset-hint">
+          Resets in {{ rateLimitStore.minuteResetLabel() }}
+        </div>
+
+      </article>
+
+      <article class="rl-card">
+
+        <div class="rl-label">
+          DAILY AI BUDGET
+        </div>
+
+        <div class="usage-row">
+
+          <strong>
+            {{ rateLimitStore.dailyUsageLabel() }}
+          </strong>
+
+          <span>
+            used / limit
+          </span>
+
+        </div>
+
+        <div class="rl-bar-track">
+          <div
+            class="rl-bar-fill daily"
+            [class.warning]="rateLimitStore.dailyWarning()"
+            [class.blocked]="rateLimitStore.status()?.blocked"
+            [style.width.%]="rateLimitStore.dailyPercent()"
+          ></div>
+        </div>
+
+        <div class="rl-numbers">
+          <span>{{ rateLimitStore.dailyPercent() }}% used</span>
+          <span>{{ rateLimitStore.remainingDaily() }} left</span>
+        </div>
+
+        <div class="reset-hint">
+          Daily reset: {{ rateLimitStore.dailyResetLabel() }}
+        </div>
+
+      </article>
+
+    </section>
+
+    <section
+      class="detail-panel"
+      [class.blocked]="rateLimitStore.status()?.blocked"
+    >
+
+      <div class="detail-item">
+
+        <span class="detail-label">
+          USER
+        </span>
+
+        <strong>
+          #{{ rateLimitStore.status()?.userId }}
+        </strong>
+
+      </div>
+
+      <div class="detail-item">
+
+        <span class="detail-label">
+          MINUTE RESET
+        </span>
+
+        <strong>
+          {{ rateLimitStore.minuteResetLabel() }}
+        </strong>
+
+      </div>
+
+      <div class="detail-item">
+
+        <span class="detail-label">
+          DAILY RESET
+        </span>
+
+        <strong>
+          {{ rateLimitStore.dailyResetLabel() }}
+        </strong>
+
+      </div>
+
+      <div class="detail-item">
+
+        <span class="detail-label">
+          STATE
+        </span>
+
+        <strong>
+          @if (rateLimitStore.status()?.blocked) {
+            Requests are throttled
+          } @else if (
+            rateLimitStore.minuteWarning() ||
+            rateLimitStore.dailyWarning()
+          ) {
+            AI quota is near the configured limit
+          } @else {
+            AI requests can run
+          }
+        </strong>
+
+      </div>
+
+    </section>
+
+  }
+
+  <section class="notes-panel">
+
+    <div class="note">
+      <span
+        [class.warning]="
+          rateLimitStore.minuteWarning() ||
+          rateLimitStore.dailyWarning()
+        "
+      ></span>
+      Minute usage is checked before AI analysis and chat requests.
+    </div>
+
+    <div class="note">
+      <span
+        [class.blocked]="rateLimitStore.status()?.blocked"
+      ></span>
+      Daily usage resets server-side according to the backend rate-limit service.
+    </div>
+
+  </section>
+
+</div>

@@ -1,0 +1,32 @@
+<div class="progress-card">
+
+  <div class="header">
+
+    <div class="file-name">
+      {{ fileName() }}
+    </div>
+
+    <div class="percentage">
+      {{ progress() }}%
+    </div>
+
+    <button
+      type="button"
+      class="cancel-button"
+      (click)="cancel.emit()"
+    >
+      Cancel
+    </button>
+
+  </div>
+
+  <div class="progress-bar">
+
+    <div
+      class="progress-fill"
+      [style.width.%]="progress()"
+    ></div>
+
+  </div>
+
+</div>

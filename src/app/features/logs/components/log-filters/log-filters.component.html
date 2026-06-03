@@ -1,0 +1,114 @@
+<div class="filters-bar">
+
+  <!-- LEVEL CHIPS -->
+
+  <div class="level-chips">
+
+    <!-- ALL -->
+
+    <button
+      class="chip"
+      type="button"
+      aria-label="Show all log levels"
+      [attr.aria-pressed]="logStore.level() === ''"
+      [class.active]="logStore.level() === ''"
+      (click)="setLevel('')"
+    >
+      ALL
+    </button>
+
+    <!-- ERROR -->
+
+    <button
+      class="chip error"
+      type="button"
+      aria-label="Filter error logs"
+      [attr.aria-pressed]="logStore.level() === LogLevel.ERROR"
+      [class.active]="
+        logStore.level() === LogLevel.ERROR
+      "
+      (click)="setLevel(LogLevel.ERROR)"
+    >
+      ERR {{ logStore.stats()?.errorCount || 0 }}
+    </button>
+
+    <!-- WARN -->
+
+    <button
+      class="chip warn"
+      type="button"
+      aria-label="Filter warning logs"
+      [attr.aria-pressed]="logStore.level() === LogLevel.WARN"
+      [class.active]="
+        logStore.level() === LogLevel.WARN
+      "
+      (click)="setLevel(LogLevel.WARN)"
+    >
+      WRN {{ logStore.stats()?.warnCount || 0 }}
+    </button>
+
+    <!-- INFO -->
+
+    <button
+      class="chip info"
+      type="button"
+      aria-label="Filter info logs"
+      [attr.aria-pressed]="logStore.level() === LogLevel.INFO"
+      [class.active]="
+        logStore.level() === LogLevel.INFO
+      "
+      (click)="setLevel(LogLevel.INFO)"
+    >
+      INF {{ logStore.stats()?.infoCount || 0 }}
+    </button>
+
+  </div>
+
+  <!-- SEARCH -->
+
+  <div class="search-wrapper">
+
+    <input
+      type="text"
+      placeholder="search logs..."
+      class="search-input"
+      aria-label="Search logs by keyword"
+      [value]="logStore.keyword()"
+      (input)="setKeyword($event)"
+    />
+
+  </div>
+
+  <div class="service-wrapper">
+
+    <input
+      type="text"
+      placeholder="service..."
+      class="search-input service-input"
+      aria-label="Filter logs by service name"
+      [value]="logStore.serviceName()"
+      (input)="setServiceName($event)"
+    />
+
+  </div>
+
+  <button
+    class="search-btn"
+    type="button"
+    aria-label="Apply log filters"
+    (click)="search()"
+  >
+    Apply
+  </button>
+
+  <button
+    class="clear-btn"
+    type="button"
+    aria-label="Clear log filters"
+    [disabled]="!logStore.hasActiveFilters()"
+    (click)="clearFilters()"
+  >
+    Clear
+  </button>
+
+</div>

@@ -1,0 +1,124 @@
+.shell-layout {
+  display: flex;
+
+  width: 100%;
+  height: 100vh;
+
+  overflow: hidden;
+
+  background: var(--bg);
+}
+
+.drawer-backdrop {
+  display: none;
+}
+
+/* ====================================== */
+/* MAIN SECTION */
+/* ====================================== */
+
+.shell-main {
+  flex: 1;
+
+  display: flex;
+  flex-direction: column;
+
+  min-width: 0;
+
+  overflow: hidden;
+}
+
+/* ====================================== */
+/* PAGE CONTENT */
+/* ====================================== */
+
+.shell-content {
+  flex: 1;
+
+  overflow-x: hidden;
+  overflow-y: auto;
+
+  height: calc(100vh - 46px);
+
+  padding: 0;
+
+  background: var(--bg);
+
+  scrollbar-width: thin;
+  scrollbar-color: var(--bg4) transparent;
+}
+
+/* ====================================== */
+/* CUSTOM SCROLLBAR */
+/* ====================================== */
+
+.shell-content::-webkit-scrollbar {
+  width: 10px;
+}
+
+.shell-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.shell-content::-webkit-scrollbar-thumb {
+  background: var(--bg4);
+
+  border-radius: 999px;
+
+  border: 2px solid var(--bg);
+}
+
+.shell-content::-webkit-scrollbar-thumb:hover {
+  background: var(--border2);
+}
+
+/* ====================================== */
+/* RESPONSIVE */
+/* ====================================== */
+
+@media (max-width: 1024px) {
+
+  .shell-content {
+    padding: 0;
+  }
+}
+
+@media (max-width: 768px) {
+
+  .shell-layout {
+    position: relative;
+  }
+
+  :host ::ng-deep app-sidebar {
+    position: fixed;
+    inset: 0 auto 0 0;
+
+    z-index: 20;
+
+    transform: translateX(-100%);
+
+    transition: transform 0.18s ease;
+  }
+
+  .shell-layout.mobile-drawer-open :host ::ng-deep app-sidebar,
+  .shell-layout.mobile-drawer-open app-sidebar {
+    transform: translateX(0);
+  }
+
+  .drawer-backdrop {
+    position: fixed;
+    inset: 0;
+
+    z-index: 10;
+
+    display: block;
+
+    border: 0;
+
+    background: rgba(0, 0, 0, 0.45);
+  }
+
+  .shell-content {
+    padding: 0;
+  }
+}

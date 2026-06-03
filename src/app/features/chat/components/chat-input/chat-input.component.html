@@ -1,0 +1,24 @@
+<div class="chat-input-wrapper">
+
+  <textarea
+    class="chat-input"
+    rows="1"
+    aria-label="Chat message"
+    placeholder="Ask AI about logs, failures, root cause..."
+    [disabled]="disabled()"
+    [value]="message()"
+    (input)="updateMessage($event)"
+    (keydown.enter)="submit(); $event.preventDefault()"
+  ></textarea>
+
+  <button
+    class="send-btn"
+    type="button"
+    aria-label="Send message"
+    [disabled]="disabled() || !message().trim()"
+    (click)="submit()"
+  >
+    Send
+  </button>
+
+</div>
