@@ -3,8 +3,6 @@ import {
   inject
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { AuthService } from '../../../core/services/auth.service';
-import { AuthStoreService } from '../../../core/stores/auth-store.service';
 import { LayoutStoreService } from '../../../core/stores/layout-store.service';
 
 @Component({
@@ -18,16 +16,6 @@ import { LayoutStoreService } from '../../../core/stores/layout-store.service';
 })
 export class TopbarComponent {
 
-  readonly authService =
-    inject(AuthService);
-
-  readonly authStore =
-    inject(AuthStoreService);
-
   readonly layoutStore =
     inject(LayoutStoreService);
-
-  logout(): void {
-    this.authService.logout();
-  }
 }

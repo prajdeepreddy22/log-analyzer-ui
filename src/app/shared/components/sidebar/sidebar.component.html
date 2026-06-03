@@ -114,7 +114,13 @@
 
   <div class="sidebar-footer">
 
-    <div class="user-row">
+    <button
+      type="button"
+      class="user-row"
+      (click)="toggleMenu()"
+      [attr.aria-expanded]="menuOpen()"
+      aria-haspopup="menu"
+    >
 
       <div class="avatar">
         {{ authStore.initials() }}
@@ -126,13 +132,159 @@
           {{ authStore.displayName() }}
         </div>
 
-        <div class="role">
-          authenticated
+        <div class="identity">
+          {{ authStore.accountSubtitle() }}
         </div>
 
       </div>
 
-    </div>
+      <span
+        class="chevron"
+        aria-hidden="true"
+      >
+        ^
+      </span>
+
+    </button>
+
+    @if (menuOpen()) {
+
+      <div
+        class="profile-menu"
+        role="menu"
+      >
+
+        <div class="menu-account">
+
+          <div class="menu-name">
+            {{ authStore.displayName() }}
+          </div>
+
+          <div class="menu-subtitle">
+            {{ authStore.accountSubtitle() }}
+          </div>
+
+        </div>
+
+        <button
+          type="button"
+          class="menu-item"
+          role="menuitem"
+          (click)="openProfile()"
+        >
+          Profile
+        </button>
+
+        <button
+          type="button"
+          class="menu-item danger"
+          role="menuitem"
+          (click)="logout()"
+        >
+          Logout
+        </button>
+
+      </div>
+    }
+
+    @if (profileOpen()) {
+
+      <div
+        class="profile-backdrop"
+        role="presentation"
+      >
+
+        <section
+          class="profile-panel"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="profile-title"
+        >
+
+          <div class="profile-panel-header">
+
+            <div>
+
+              <div
+                id="profile-title"
+                class="profile-title"
+              >
+                Profile
+              </div>
+
+              <div class="profile-subtitle">
+                Update your name.
+              </div>
+
+            </div>
+
+            <button
+              type="button"
+              class="panel-close"
+              aria-label="Close profile editor"
+              (click)="closeProfile()"
+            >
+              x
+            </button>
+
+          </div>
+
+          <label class="profile-field">
+
+            <span>Display Name</span>
+
+            <input
+              type="text"
+              maxlength="100"
+              [value]="profileDisplayName()"
+              (input)="updateProfileDisplayName($event)"
+              [class.invalid]="profileInvalid()"
+            />
+
+          </label>
+
+          @if (profileInvalid()) {
+            <div class="profile-error">
+              Display name must be 2-100 characters.
+            </div>
+          }
+
+          @if (profileError()) {
+            <div class="profile-error">
+              {{ profileError() }}
+            </div>
+          }
+
+          <div class="profile-actions">
+
+            <button
+              type="button"
+              class="profile-secondary"
+              (click)="closeProfile()"
+              [disabled]="profileSaving()"
+            >
+              Cancel
+            </button>
+
+            <button
+              type="button"
+              class="profile-primary"
+              (click)="saveProfile()"
+              [disabled]="profileSaving()"
+            >
+              @if (profileSaving()) {
+                Saving...
+              } @else {
+                Save
+              }
+            </button>
+
+          </div>
+
+        </section>
+
+      </div>
+    }
 
   </div>
 

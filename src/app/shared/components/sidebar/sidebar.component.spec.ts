@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
 
 import { SidebarComponent } from './sidebar.component';
@@ -11,6 +12,7 @@ describe('SidebarComponent', () => {
     await TestBed.configureTestingModule({
       imports: [SidebarComponent],
       providers: [
+        provideHttpClient(),
         provideRouter([])
       ]
     })

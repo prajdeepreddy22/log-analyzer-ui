@@ -5,6 +5,7 @@ import {
 } from '@angular/core';
 
 import { TokenStorageUtil } from '../utils/token-storage.util';
+import { AuthUserModel } from '../models/auth/auth-user.model';
 
 @Injectable({
   providedIn: 'root'
@@ -16,8 +17,15 @@ export class AuthStoreService {
       TokenStorageUtil.getToken()
     );
 
+  private readonly userSignal =
+    signal<AuthUserModel | null>(null);
+
   readonly token = computed(() =>
     this.tokenSignal()
+  );
+
+  readonly user = computed(() =>
+    this.userSignal()
   );
 
   readonly isAuthenticated = computed(() =>
@@ -32,15 +40,40 @@ export class AuthStoreService {
 
   readonly displayName = computed(() => {
 
+    const user =
+      this.userSignal();
+
     const claims =
       this.claims();
 
     return (
+      user?.displayName ||
+      user?.fullName ||
+      user?.username ||
+      user?.email ||
       claims?.['name'] ||
       claims?.['username'] ||
       claims?.['sub'] ||
       claims?.['email'] ||
       'Authenticated user'
+    );
+  });
+
+  readonly accountSubtitle = computed(() => {
+
+    const user =
+      this.userSignal();
+
+    const claims =
+      this.claims();
+
+    return (
+      user?.username ||
+      user?.email ||
+      claims?.['username'] ||
+      claims?.['email'] ||
+      claims?.['sub'] ||
+      ''
     );
   });
 
@@ -64,11 +97,29 @@ export class AuthStoreService {
     this.tokenSignal.set(token);
   }
 
+  setUser(
+    user: AuthUserModel | null
+  ): void {
+
+    this.userSignal.set(user);
+  }
+
+  patchUser(
+    patch: Partial<AuthUserModel>
+  ): void {
+
+    this.userSignal.update(user => ({
+      ...(user ?? {}),
+      ...patch
+    }));
+  }
+
   clear(): void {
 
     TokenStorageUtil.clearToken();
 
     this.tokenSignal.set(null);
+    this.userSignal.set(null);
   }
 
   getToken(): string | null {
