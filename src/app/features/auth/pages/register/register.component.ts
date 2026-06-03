@@ -40,6 +40,9 @@ import { getApiErrorMessage } from '../../../../core/utils/api-error-message.uti
 })
 export class RegisterComponent {
 
+  private readonly passwordMinLength =
+    8;
+
   private readonly authService =
     inject(AuthService);
 
@@ -55,6 +58,9 @@ export class RegisterComponent {
   readonly errorMessage =
     signal<string | null>(null);
 
+  readonly displayName =
+    signal('');
+
   readonly username =
     signal('');
 
@@ -67,7 +73,16 @@ export class RegisterComponent {
   readonly confirmPassword =
     signal('');
 
+  readonly showPassword =
+    signal(false);
+
+  readonly showConfirmPassword =
+    signal(false);
+
   readonly submitted =
+    signal(false);
+
+  readonly displayNameInvalid =
     signal(false);
 
   readonly usernameInvalid =
@@ -91,6 +106,9 @@ export class RegisterComponent {
     this.errorMessage.set(null);
     this.submitted.set(true);
 
+    const displayName =
+      this.displayName().trim();
+
     const username =
       this.username().trim();
 
@@ -103,8 +121,20 @@ export class RegisterComponent {
     const confirmPassword =
       this.confirmPassword();
 
+    this.displayNameInvalid.set(
+      !this.isLengthBetween(
+        displayName,
+        2,
+        100
+      )
+    );
+
     this.usernameInvalid.set(
-      username.length < 3
+      !this.isLengthBetween(
+        username,
+        3,
+        100
+      )
     );
 
     this.emailInvalid.set(
@@ -112,7 +142,7 @@ export class RegisterComponent {
     );
 
     this.passwordInvalid.set(
-      password.length < 6
+      password.length < this.passwordMinLength
     );
 
     this.confirmPasswordInvalid.set(
@@ -125,6 +155,7 @@ export class RegisterComponent {
     );
 
     if (
+      this.displayNameInvalid() ||
       this.usernameInvalid() ||
       this.emailInvalid() ||
       this.passwordInvalid() ||
@@ -138,6 +169,7 @@ export class RegisterComponent {
 
     this.authService
       .register({
+        displayName,
         username,
         email,
         password
@@ -181,11 +213,39 @@ export class RegisterComponent {
     const value =
       (event.target as HTMLInputElement).value;
 
+    this.clearApiMessages();
+
     this.username.set(value);
 
     if (this.submitted()) {
       this.usernameInvalid.set(
-        value.trim().length < 3
+        !this.isLengthBetween(
+          value.trim(),
+          3,
+          100
+        )
+      );
+    }
+  }
+
+  updateDisplayName(
+    event: Event
+  ): void {
+
+    const value =
+      (event.target as HTMLInputElement).value;
+
+    this.clearApiMessages();
+
+    this.displayName.set(value);
+
+    if (this.submitted()) {
+      this.displayNameInvalid.set(
+        !this.isLengthBetween(
+          value.trim(),
+          2,
+          100
+        )
       );
     }
   }
@@ -196,6 +256,8 @@ export class RegisterComponent {
 
     const value =
       (event.target as HTMLInputElement).value;
+
+    this.clearApiMessages();
 
     this.email.set(value);
 
@@ -213,11 +275,13 @@ export class RegisterComponent {
     const value =
       (event.target as HTMLInputElement).value;
 
+    this.clearApiMessages();
+
     this.password.set(value);
 
     if (this.submitted()) {
       this.passwordInvalid.set(
-        value.length < 6
+        value.length < this.passwordMinLength
       );
 
       this.passwordsMismatch.set(
@@ -234,6 +298,8 @@ export class RegisterComponent {
     const value =
       (event.target as HTMLInputElement).value;
 
+    this.clearApiMessages();
+
     this.confirmPassword.set(value);
 
     if (this.submitted()) {
@@ -246,6 +312,25 @@ export class RegisterComponent {
     }
   }
 
+  togglePasswordVisibility(): void {
+
+    this.showPassword.update(
+      visible => !visible
+    );
+  }
+
+  toggleConfirmPasswordVisibility(): void {
+
+    this.showConfirmPassword.update(
+      visible => !visible
+    );
+  }
+
+  passwordHelpText(): string {
+
+    return `Min ${this.passwordMinLength} characters required`;
+  }
+
   private isValidEmail(
     email: string
   ): boolean {
@@ -253,5 +338,21 @@ export class RegisterComponent {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
       email
     );
+  }
+
+  private isLengthBetween(
+    value: string,
+    min: number,
+    max: number
+  ): boolean {
+
+    return value.length >= min &&
+      value.length <= max;
+  }
+
+  private clearApiMessages(): void {
+
+    this.errorMessage.set(null);
+    this.successMessage.set(null);
   }
 }

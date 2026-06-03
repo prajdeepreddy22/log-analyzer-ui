@@ -47,59 +47,132 @@
       class="register-form"
     >
 
+      <!-- DISPLAY NAME -->
+      <div class="form-group">
+        <label for="displayName">Display Name</label>
+        <input
+          id="displayName"
+          type="text"
+          autocomplete="name"
+          maxlength="100"
+          [value]="displayName()"
+          (input)="updateDisplayName($event)"
+          [class.invalid]="displayNameInvalid()"
+        />
+
+        @if (displayNameInvalid()) {
+          <div class="field-error">
+            Display name must be 2-100 characters
+          </div>
+        }
+      </div>
+
       <!-- USERNAME -->
       <div class="form-group">
-        <label>Username</label>
+        <label for="username">Username</label>
         <input
+          id="username"
           type="text"
+          autocomplete="username"
+          maxlength="100"
           [value]="username()"
           (input)="updateUsername($event)"
+          [class.invalid]="usernameInvalid()"
         />
 
         @if (usernameInvalid()) {
-          <div class="field-error">Min 3 characters required</div>
+          <div class="field-error">
+            Username must be 3-100 characters
+          </div>
         }
       </div>
 
       <!-- EMAIL -->
       <div class="form-group">
-        <label>Email</label>
+        <label for="email">Email</label>
         <input
+          id="email"
           type="email"
+          autocomplete="email"
           [value]="email()"
           (input)="updateEmail($event)"
+          [class.invalid]="emailInvalid()"
         />
 
         @if (emailInvalid()) {
-          <div class="field-error">Valid email required</div>
+          <div class="field-error">
+            Enter a valid email address
+          </div>
         }
       </div>
 
       <!-- PASSWORD -->
       <div class="form-group">
-        <label>Password</label>
-        <input
-          type="password"
-          [value]="password()"
-          (input)="updatePassword($event)"
-        />
+        <label for="password">Password</label>
+
+        <div class="password-field">
+          <input
+            id="password"
+            [type]="showPassword() ? 'text' : 'password'"
+            autocomplete="new-password"
+            [value]="password()"
+            (input)="updatePassword($event)"
+            [class.invalid]="passwordInvalid()"
+          />
+
+          <button
+            type="button"
+            class="password-toggle"
+            (click)="togglePasswordVisibility()"
+            [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'"
+          >
+            @if (showPassword()) {
+              Hide
+            } @else {
+              Show
+            }
+          </button>
+        </div>
 
         @if (passwordInvalid()) {
-          <div class="field-error">Min 6 characters required</div>
+          <div class="field-error">
+            {{ passwordHelpText() }}
+          </div>
         }
       </div>
 
       <!-- CONFIRM PASSWORD -->
       <div class="form-group">
-        <label>Confirm Password</label>
-        <input
-          type="password"
-          [value]="confirmPassword()"
-          (input)="updateConfirmPassword($event)"
-        />
+        <label for="confirmPassword">Confirm Password</label>
+
+        <div class="password-field">
+          <input
+            id="confirmPassword"
+            [type]="showConfirmPassword() ? 'text' : 'password'"
+            autocomplete="new-password"
+            [value]="confirmPassword()"
+            (input)="updateConfirmPassword($event)"
+            [class.invalid]="confirmPasswordInvalid() || passwordsMismatch()"
+          />
+
+          <button
+            type="button"
+            class="password-toggle"
+            (click)="toggleConfirmPasswordVisibility()"
+            [attr.aria-label]="showConfirmPassword() ? 'Hide confirm password' : 'Show confirm password'"
+          >
+            @if (showConfirmPassword()) {
+              Hide
+            } @else {
+              Show
+            }
+          </button>
+        </div>
 
         @if (confirmPasswordInvalid()) {
-          <div class="field-error">Confirm your password</div>
+          <div class="field-error">
+            Confirm your password
+          </div>
         }
       </div>
 
