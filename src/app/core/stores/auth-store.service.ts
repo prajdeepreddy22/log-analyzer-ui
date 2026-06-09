@@ -29,7 +29,9 @@ export class AuthStoreService {
   );
 
   readonly isAuthenticated = computed(() =>
-    Boolean(this.tokenSignal())
+    this.hasValidToken(
+      this.tokenSignal()
+    )
   );
 
   readonly claims = computed(() =>
@@ -51,10 +53,10 @@ export class AuthStoreService {
       user?.fullName ||
       user?.username ||
       user?.email ||
-      claims?.['name'] ||
-      claims?.['username'] ||
-      claims?.['sub'] ||
-      claims?.['email'] ||
+      this.claimText(claims, 'name') ||
+      this.claimText(claims, 'username') ||
+      this.claimText(claims, 'sub') ||
+      this.claimText(claims, 'email') ||
       'Authenticated user'
     );
   });
@@ -70,9 +72,9 @@ export class AuthStoreService {
     return (
       user?.username ||
       user?.email ||
-      claims?.['username'] ||
-      claims?.['email'] ||
-      claims?.['sub'] ||
+      this.claimText(claims, 'username') ||
+      this.claimText(claims, 'email') ||
+      this.claimText(claims, 'sub') ||
       ''
     );
   });
@@ -124,12 +126,24 @@ export class AuthStoreService {
 
   getToken(): string | null {
 
-    return this.tokenSignal();
+    const token =
+      this.tokenSignal();
+
+    if (!this.hasValidToken(token)) {
+
+      if (token) {
+        this.clear();
+      }
+
+      return null;
+    }
+
+    return token;
   }
 
   private decodeClaims(
     token: string | null
-  ): Record<string, string> | null {
+  ): Record<string, unknown> | null {
 
     if (!token) {
       return null;
@@ -148,11 +162,52 @@ export class AuthStoreService {
           .replace(/-/g, '+')
           .replace(/_/g, '/');
 
+      const padded =
+        normalized.padEnd(
+          Math.ceil(normalized.length / 4) * 4,
+          '='
+        );
+
       return JSON.parse(
-        atob(normalized)
-      ) as Record<string, string>;
+        atob(padded)
+      ) as Record<string, unknown>;
     } catch {
       return null;
     }
+  }
+
+  private hasValidToken(
+    token: string | null
+  ): boolean {
+
+    if (!token) {
+      return false;
+    }
+
+    const claims =
+      this.decodeClaims(token);
+
+    const expiresAt =
+      claims?.['exp'];
+
+    if (typeof expiresAt !== 'number') {
+      return true;
+    }
+
+    return expiresAt * 1000 >
+      Date.now();
+  }
+
+  private claimText(
+    claims: Record<string, unknown> | null,
+    key: string
+  ): string {
+
+    const value =
+      claims?.[key];
+
+    return typeof value === 'string'
+      ? value
+      : '';
   }
 }

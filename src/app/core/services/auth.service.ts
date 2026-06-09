@@ -21,6 +21,9 @@ import { AuthStoreService } from '../stores/auth-store.service';
 import { RateLimitStoreService } from '../stores/rate-limit-store.service';
 import { ChatStoreService } from '../stores/chat-store.service';
 import { AnalysisStoreService } from '../stores/analysis-store.service';
+import { UploadStoreService } from '../stores/upload-store.service';
+import { LogStoreService } from '../stores/log-store.service';
+import { ChatStreamingService } from './chat-streaming.service';
 
 @Injectable({
   providedIn: 'root'
@@ -33,6 +36,9 @@ export class AuthService {
   private readonly rateLimitStore = inject(RateLimitStoreService);
   private readonly chatStore = inject(ChatStoreService);
   private readonly analysisStore = inject(AnalysisStoreService);
+  private readonly uploadStore = inject(UploadStoreService);
+  private readonly logStore = inject(LogStoreService);
+  private readonly chatStreaming = inject(ChatStreamingService);
 
   // =====================================================
   // AUTH STATE (SIGNAL BASED)
@@ -145,6 +151,9 @@ export class AuthService {
     this.chatStore.setLoading(false);
     this.chatStore.setStreaming(false);
     this.analysisStore.stopPolling();
+    this.uploadStore.stopActiveWork();
+    this.logStore.stopActiveRequests();
+    this.chatStreaming.closeAll();
 
     // optional cleanup hook for future stores
     // resetAuthStore();

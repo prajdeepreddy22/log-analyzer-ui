@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  OnDestroy,
   OnInit,
   computed,
   inject,
@@ -35,7 +36,7 @@ import { UploadStatus } from '../../../../core/models/upload/upload-status.enum'
     ChangeDetectionStrategy.OnPush
 })
 export class AnalysisPageComponent
-  implements OnInit {
+  implements OnInit, OnDestroy {
 
   private readonly route =
     inject(ActivatedRoute);
@@ -128,6 +129,11 @@ export class AnalysisPageComponent
     }
 
     this.analysisStore.loadHistory();
+  }
+
+  ngOnDestroy(): void {
+
+    this.analysisStore.stopPolling();
   }
 
   runAnalysis(): void {

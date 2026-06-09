@@ -441,4 +441,15 @@ export class LogStoreService {
     this.activeLogsRequest?.unsubscribe();
     this.activeLogsRequest = null;
   }
+
+  stopActiveRequests(): void {
+
+    this.cancelLogsRequest();
+
+    this.activeStatsRequest?.unsubscribe();
+    this.activeStatsRequest = null;
+
+    this.loading.set(false);
+    this.statsLoading.set(false);
+  }
 }

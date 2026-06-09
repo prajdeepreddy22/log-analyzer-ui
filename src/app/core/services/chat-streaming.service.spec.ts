@@ -3,14 +3,14 @@ import { TestBed } from '@angular/core/testing';
 import {
   ChatStreamingService
 } from './chat-streaming.service';
-import { AuthService } from './auth.service';
+import { AuthStoreService } from '../stores/auth-store.service';
 import { environment } from '../../../environments/environment';
 
 class MockEventSource {
   static instances: MockEventSource[] = [];
 
   readonly url: string;
-  readyState = EventSource.OPEN;
+  readyState: number = EventSource.OPEN;
   onopen: (() => void) | null = null;
   onmessage: ((event: MessageEvent<string>) => void) | null = null;
   onerror: (() => void) | null = null;
@@ -58,7 +58,7 @@ class MockEventSource {
 
 describe('ChatStreamingService', () => {
   let service: ChatStreamingService;
-  let authService: jasmine.SpyObj<AuthService>;
+  let authStore: jasmine.SpyObj<AuthStoreService>;
   let originalEventSource: typeof EventSource;
 
   beforeEach(() => {
@@ -66,8 +66,8 @@ describe('ChatStreamingService', () => {
 
     originalEventSource = window.EventSource;
 
-    authService = jasmine.createSpyObj<AuthService>(
-      'AuthService',
+    authStore = jasmine.createSpyObj<AuthStoreService>(
+      'AuthStoreService',
       ['getToken']
     );
 
@@ -75,8 +75,8 @@ describe('ChatStreamingService', () => {
       providers: [
         ChatStreamingService,
         {
-          provide: AuthService,
-          useValue: authService
+          provide: AuthStoreService,
+          useValue: authStore
         }
       ]
     });
@@ -97,7 +97,7 @@ describe('ChatStreamingService', () => {
   });
 
   it('opens SSE with upload, message, and token query params', () => {
-    authService.getToken.and.returnValue('jwt-token');
+    authStore.getToken.and.returnValue('jwt-token');
 
     const subscription =
       service
@@ -117,7 +117,7 @@ describe('ChatStreamingService', () => {
   });
 
   it('emits chunks and closes when stream completes', done => {
-    authService.getToken.and.returnValue('jwt-token');
+    authStore.getToken.and.returnValue('jwt-token');
 
     const chunks: string[] = [];
 
@@ -160,7 +160,7 @@ describe('ChatStreamingService', () => {
   });
 
   it('handles backend complete event without reporting interruption', done => {
-    authService.getToken.and.returnValue('jwt-token');
+    authStore.getToken.and.returnValue('jwt-token');
 
     const chunks: string[] = [];
 
@@ -209,19 +209,71 @@ describe('ChatStreamingService', () => {
   });
 
   it('fails before opening SSE when token is missing', done => {
-    authService.getToken.and.returnValue(null);
+    authStore.getToken.and.returnValue(null);
 
     service
       .stream('upload-1', 'question')
       .subscribe({
         error: error => {
           expect(error.message).toContain(
-            'Missing authentication token'
+            'session expired'
           );
 
           expect(MockEventSource.instances.length).toBe(0);
           done();
         }
       });
+  });
+
+  it('stops reconnecting after the configured transient error limit', done => {
+    authStore.getToken.and.returnValue('jwt-token');
+
+    service
+      .stream('upload-1', 'question')
+      .subscribe({
+        error: error => {
+          const source =
+            MockEventSource.instances[0];
+
+          expect(error.message).toContain(
+            'Streaming chat failed'
+          );
+
+          expect(source.close).toHaveBeenCalled();
+          done();
+        }
+      });
+
+    const source =
+      MockEventSource.instances[0];
+
+    source.readyState =
+      EventSource.CONNECTING;
+
+    source.onerror?.();
+    source.onerror?.();
+    source.onerror?.();
+  });
+
+  it('closes all active streams during session cleanup', () => {
+    authStore.getToken.and.returnValue('jwt-token');
+
+    service
+      .stream('upload-1', 'question')
+      .subscribe();
+
+    service
+      .stream('upload-2', 'question')
+      .subscribe();
+
+    service.closeAll();
+
+    expect(
+      MockEventSource.instances[0].close
+    ).toHaveBeenCalled();
+
+    expect(
+      MockEventSource.instances[1].close
+    ).toHaveBeenCalled();
   });
 });

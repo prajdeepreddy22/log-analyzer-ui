@@ -12,6 +12,7 @@ import {
 import {
   finalize,
   interval,
+  startWith,
   Subscription,
   switchMap,
   takeWhile
@@ -36,6 +37,9 @@ export class UploadStoreService {
 
   private loadUploadsSubscription:
     Subscription | null = null;
+
+  private readonly pollingSubscriptions =
+    new Map<string, Subscription>();
 
   // =========================
   // STATE
@@ -429,8 +433,15 @@ export class UploadStoreService {
     uploadId: string
   ): void {
 
-    interval(2000)
+    this.pollingSubscriptions
+      .get(uploadId)
+      ?.unsubscribe();
+
+    const subscription =
+      interval(2000)
       .pipe(
+
+        startWith(0),
 
         switchMap(() =>
           this.uploadApi.getUploadStatus(
@@ -463,8 +474,45 @@ export class UploadStoreService {
         error: err => {
 
           console.error(err);
+
+          this.pollingSubscriptions.delete(
+            uploadId
+          );
+        },
+
+        complete: () => {
+
+          this.pollingSubscriptions.delete(
+            uploadId
+          );
         }
       });
+
+    this.pollingSubscriptions.set(
+      uploadId,
+      subscription
+    );
+  }
+
+  stopActiveWork(): void {
+
+    this.uploadSubscription?.unsubscribe();
+    this.loadUploadsSubscription?.unsubscribe();
+
+    this.uploadSubscription = null;
+    this.loadUploadsSubscription = null;
+
+    this.pollingSubscriptions
+      .forEach(subscription =>
+        subscription.unsubscribe()
+      );
+
+    this.pollingSubscriptions.clear();
+
+    this.uploading.set(false);
+    this.loading.set(false);
+    this.uploadProgress.set(0);
+    this.uploadFileName.set(null);
   }
 
   // =========================

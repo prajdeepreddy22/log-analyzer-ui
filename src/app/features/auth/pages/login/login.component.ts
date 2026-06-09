@@ -10,6 +10,7 @@ import {
 } from '@angular/common';
 
 import {
+  ActivatedRoute,
   Router,
   RouterLink
 } from '@angular/router';
@@ -42,6 +43,8 @@ export class LoginComponent {
   private readonly authService = inject(AuthService);
 
   private readonly router = inject(Router);
+
+  private readonly route = inject(ActivatedRoute);
 
   readonly loading = signal(false);
 
@@ -109,7 +112,19 @@ export class LoginComponent {
 
       next: () => {
 
-        console.log('Login successful');
+        const returnUrl =
+          this.route.snapshot.queryParamMap.get(
+            'returnUrl'
+          );
+
+        if (
+          returnUrl &&
+          returnUrl.startsWith('/') &&
+          !returnUrl.startsWith('//')
+        ) {
+          this.router.navigateByUrl(returnUrl);
+          return;
+        }
 
         this.router.navigate(['/dashboard']);
 

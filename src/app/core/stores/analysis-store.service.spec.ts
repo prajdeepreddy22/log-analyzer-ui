@@ -14,17 +14,30 @@ import {
 } from '@angular/common/http';
 
 import { AnalysisStoreService } from './analysis-store.service';
+import { RateLimitStoreService } from './rate-limit-store.service';
 import { environment } from '../../../environments/environment';
 
 describe('AnalysisStoreService', () => {
   let service: AnalysisStoreService;
   let httpMock: HttpTestingController;
+  let rateLimitStore:
+    jasmine.SpyObj<RateLimitStoreService>;
 
   beforeEach(() => {
+    rateLimitStore =
+      jasmine.createSpyObj<RateLimitStoreService>(
+        'RateLimitStoreService',
+        ['refreshNow']
+      );
+
     TestBed.configureTestingModule({
       providers: [
         provideHttpClient(),
-        provideHttpClientTesting()
+        provideHttpClientTesting(),
+        {
+          provide: RateLimitStoreService,
+          useValue: rateLimitStore
+        }
       ]
     });
 
@@ -104,5 +117,8 @@ describe('AnalysisStoreService', () => {
     expect(service.analysis()?.summary).toBe(
       'Auth service failed'
     );
+
+    expect(rateLimitStore.refreshNow)
+      .toHaveBeenCalled();
   }));
 });

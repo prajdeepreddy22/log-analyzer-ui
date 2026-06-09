@@ -9,7 +9,7 @@ import {
 
 import { environment } from '../../../environments/environment';
 
-import { AuthService } from './auth.service';
+import { AuthStoreService } from '../stores/auth-store.service';
 
 export interface ChatStreamChunk {
   content: string;
@@ -18,13 +18,36 @@ export interface ChatStreamChunk {
 
 const MAX_TRANSIENT_ERRORS = 2;
 
+export class ChatStreamError extends Error {
+
+  constructor(
+    message: string,
+    readonly status?: number
+  ) {
+    super(message);
+    this.name = 'ChatStreamError';
+  }
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class ChatStreamingService {
 
-  private readonly authService =
-    inject(AuthService);
+  private readonly authStore =
+    inject(AuthStoreService);
+
+  private readonly activeSources =
+    new Set<EventSource>();
+
+  closeAll(): void {
+
+    this.activeSources.forEach(source =>
+      source.close()
+    );
+
+    this.activeSources.clear();
+  }
 
   stream(
     uploadId: string,
@@ -35,11 +58,14 @@ export class ChatStreamingService {
       observer => {
 
         const token =
-          this.authService.getToken();
+          this.authStore.getToken();
 
         if (!token) {
           observer.error(
-            new Error('Missing authentication token')
+            new ChatStreamError(
+              'Your session expired. Please log in again.',
+              401
+            )
           );
           return undefined;
         }
@@ -56,8 +82,16 @@ export class ChatStreamingService {
             `${environment.apiBaseUrl}/chat/stream?${params.toString()}`
           );
 
+        this.activeSources.add(source);
+
         let transientErrors = 0;
         let closedSuccessfully = false;
+
+        const closeSource = (): void => {
+
+          this.activeSources.delete(source);
+          source.close();
+        };
 
         const closeSuccessfully = (
           chunk: ChatStreamChunk = {
@@ -73,7 +107,7 @@ export class ChatStreamingService {
           closedSuccessfully = true;
 
           observer.next(chunk);
-          source.close();
+          closeSource();
           observer.complete();
         };
 
@@ -89,10 +123,6 @@ export class ChatStreamingService {
           }
 
           return JSON.parse(data) as ChatStreamChunk;
-        };
-
-        source.onopen = () => {
-          transientErrors = 0;
         };
 
         source.onmessage = event => {
@@ -114,8 +144,9 @@ export class ChatStreamingService {
 
             observer.next(chunk);
           } catch (error) {
+            closedSuccessfully = true;
+            closeSource();
             observer.error(error);
-            source.close();
           }
         };
 
@@ -139,8 +170,9 @@ export class ChatStreamingService {
                 completed: true
               });
             } catch (error) {
+              closedSuccessfully = true;
+              closeSource();
               observer.error(error);
-              source.close();
             }
           }
         );
@@ -148,7 +180,7 @@ export class ChatStreamingService {
         source.onerror = () => {
 
           if (closedSuccessfully) {
-            source.close();
+            closeSource();
             return;
           }
 
@@ -161,15 +193,20 @@ export class ChatStreamingService {
             return;
           }
 
+          closedSuccessfully = true;
+
+          closeSource();
+
           observer.error(
-            new Error('Chat stream failed')
+            new ChatStreamError(
+              'Streaming chat failed. Please try again.'
+            )
           );
-          source.close();
         };
 
         return () => {
           closedSuccessfully = true;
-          source.close();
+          closeSource();
         };
       }
     );

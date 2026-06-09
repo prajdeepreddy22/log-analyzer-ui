@@ -55,6 +55,12 @@ For a separate backend domain, update:
 src/environments/environment.production.ts
 ```
 
+The exact production value after backend deployment is:
+
+```ts
+apiBaseUrl: 'https://YOUR_BACKEND_DEPLOYED_DOMAIN/api'
+```
+
 ## Deployment Checklist
 
 - Run `npm run build:prod`.
@@ -62,3 +68,6 @@ src/environments/environment.production.ts
 - Configure SPA fallback to `index.html`.
 - Configure `/api/*` proxying to the backend.
 - Verify JWT auth, upload flow, log viewer, analysis, chat streaming, and rate-limit status against the deployed backend.
+
+See [DEPLOYMENT.md](DEPLOYMENT.md) for the complete CloudFront, SPA routing,
+backend CORS, SSE, and post-deployment checklist.

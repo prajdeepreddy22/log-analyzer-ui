@@ -10,8 +10,7 @@ export function getApiErrorMessage(
 
   const backendMessage =
     error.error?.message ||
-    error.error?.error ||
-    error.message;
+    error.error?.error;
 
   switch (error.status) {
 
@@ -40,6 +39,8 @@ export function getApiErrorMessage(
       return 'Server error. Please try again after a moment.';
 
     default:
-      return backendMessage || 'Something went wrong. Please try again.';
+      return backendMessage ||
+        error.message ||
+        'Something went wrong. Please try again.';
   }
 }

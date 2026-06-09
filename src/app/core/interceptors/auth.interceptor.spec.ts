@@ -10,6 +10,7 @@ import { of } from 'rxjs';
 
 import { authInterceptor } from './auth.interceptor';
 import { AuthStoreService } from '../stores/auth-store.service';
+import { environment } from '../../../environments/environment';
 
 describe('authInterceptor', () => {
   const runInterceptor: HttpInterceptorFn = (req, next) =>
@@ -41,7 +42,7 @@ describe('authInterceptor', () => {
     const request =
       new HttpRequest(
         'GET',
-        'http://localhost:8080/api/uploads'
+        `${environment.apiBaseUrl}/uploads`
       );
 
     runInterceptor(request, req => {
@@ -59,7 +60,7 @@ describe('authInterceptor', () => {
     const request =
       new HttpRequest(
         'POST',
-        'http://localhost:8080/api/auth/login',
+        `${environment.apiBaseUrl}/auth/login`,
         {}
       );
 
@@ -78,7 +79,7 @@ describe('authInterceptor', () => {
     const request =
       new HttpRequest(
         'GET',
-        'http://localhost:8080/api/uploads'
+        `${environment.apiBaseUrl}/uploads`
       );
 
     runInterceptor(request, req => {

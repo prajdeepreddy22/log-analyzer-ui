@@ -1,6 +1,8 @@
-import { CanActivateFn } from '@angular/router';
+import {
+  CanActivateFn,
+  Router
+} from '@angular/router';
 import { inject } from '@angular/core';
-import { Router } from '@angular/router';
 import { AuthStoreService } from '../stores/auth-store.service';
 
 export const authGuard: CanActivateFn = (route, state) => {
@@ -14,8 +16,17 @@ export const authGuard: CanActivateFn = (route, state) => {
   // NOT LOGGED IN → REDIRECT
   // ===============================
   if (!authStore.isAuthenticated()) {
-    router.navigate(['/login']);
-    return false;
+
+    authStore.clear();
+
+    return router.createUrlTree(
+      ['/login'],
+      {
+        queryParams: {
+          returnUrl: state.url
+        }
+      }
+    );
   }
 
   // ===============================

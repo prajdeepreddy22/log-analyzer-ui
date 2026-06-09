@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  OnDestroy,
   OnInit,
   inject
 } from '@angular/core';
@@ -56,7 +57,7 @@ import { LogLevel } from '../../../../core/models/log/log-level.enum';
     ChangeDetectionStrategy.OnPush
 })
 export class LogViewerPageComponent
-  implements OnInit {
+  implements OnInit, OnDestroy {
 
   private readonly route =
     inject(ActivatedRoute);
@@ -125,6 +126,12 @@ export class LogViewerPageComponent
         this.uploadId
       );
     }
+  }
+
+  ngOnDestroy(): void {
+
+    this.logStore.stopActiveRequests();
+    this.analysisStore.stopPolling();
   }
 
   private applyQueryParams(): void {

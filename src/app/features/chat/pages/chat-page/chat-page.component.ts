@@ -26,7 +26,12 @@ import { UploadApiService } from '../../../../core/api/upload-api.service';
 
 import { ChatApiService } from '../../../../core/api/chat-api.service';
 
-import { ChatStreamingService } from '../../../../core/services/chat-streaming.service';
+import {
+  ChatStreamError,
+  ChatStreamingService
+} from '../../../../core/services/chat-streaming.service';
+
+import { AuthService } from '../../../../core/services/auth.service';
 
 import { ChatMessageListComponent } from '../../components/chat-message-list/chat-message-list.component';
 
@@ -85,6 +90,9 @@ export class ChatPageComponent
 
   private readonly chatStreaming =
     inject(ChatStreamingService);
+
+  private readonly authService =
+    inject(AuthService);
 
   private readonly route =
     inject(ActivatedRoute);
@@ -250,15 +258,14 @@ export class ChatPageComponent
 
   stopGeneration(): void {
 
-    if (!this.streamSubscription) {
-      return;
+    if (this.streamSubscription) {
+      this.streamSubscription.unsubscribe();
+      this.streamSubscription = undefined;
     }
 
-    this.streamSubscription.unsubscribe();
-    this.streamSubscription = undefined;
+    this.cancelStreamingRender();
 
     if (this.activeStreamingMessageId) {
-      this.cancelStreamingRender();
 
       this.chatStore.updateStreamingMessage(
         this.activeStreamingMessageId,
@@ -368,7 +375,7 @@ export class ChatPageComponent
             }
           },
 
-          error: () => {
+          error: error => {
 
             this.cancelStreamingRender();
 
@@ -391,6 +398,15 @@ export class ChatPageComponent
 
             this.chatStore.setStreaming(false);
             this.chatStore.setLoading(false);
+
+            if (
+              error instanceof ChatStreamError &&
+              error.status === 401
+            ) {
+              this.authService.logout();
+              return;
+            }
+
             this.chatStore.setError(
               'Streaming chat failed. Please try again.'
             );
