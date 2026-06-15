@@ -121,12 +121,12 @@ export class UploadDropzoneComponent {
     }
 
     const maxSize =
-      50 * 1024 * 1024;
+      10 * 1024 * 1024;
 
     if (file.size > maxSize) {
 
       this.error.set(
-        'Maximum file size is 50MB'
+        'Maximum file size is 10MB'
       );
 
       return;

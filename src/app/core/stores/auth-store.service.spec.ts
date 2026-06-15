@@ -44,6 +44,16 @@ describe('AuthStoreService', () => {
       localStorage.getItem('logai_token')
     ).toBeNull();
   });
+
+  it('rejects and clears a malformed JWT', () => {
+    service.setToken('not-a-jwt');
+
+    expect(service.isAuthenticated()).toBeFalse();
+    expect(service.getToken()).toBeNull();
+    expect(
+      localStorage.getItem('logai_token')
+    ).toBeNull();
+  });
 });
 
 function createToken(

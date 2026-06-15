@@ -12,6 +12,7 @@ import {
 import { LogStoreService } from '../../../../core/stores/log-store.service';
 
 import { LogResponseModel } from '../../../../core/models/log/log-response.model';
+import { LogSortField } from '../../../../core/models/log/log-search-request.model';
 
 import {
   Router
@@ -112,7 +113,7 @@ export class LogTableComponent
   }
 
   sort(
-    sortBy: string
+    sortBy: LogSortField
   ): void {
 
     const nextDirection =
@@ -143,7 +144,7 @@ export class LogTableComponent
   }
 
   sortIndicator(
-    sortBy: string
+    sortBy: LogSortField
   ): string {
 
     if (this.logStore.sortBy() !== sortBy) {
@@ -156,7 +157,7 @@ export class LogTableComponent
   }
 
   ariaSort(
-    sortBy: string
+    sortBy: LogSortField
   ): 'ascending' | 'descending' | 'none' {
 
     if (this.logStore.sortBy() !== sortBy) {

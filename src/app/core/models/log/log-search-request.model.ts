@@ -8,11 +8,21 @@ export interface LogSearchRequestModel {
 
   serviceName?: string;
 
+  startDate?: string;
+
+  endDate?: string;
+
   page: number;
 
   size: number;
 
-  sortBy: string;
+  sortBy: LogSortField;
 
   direction: 'asc' | 'desc';
 }
+
+export type LogSortField =
+  | 'logSequence'
+  | 'logTimestamp'
+  | 'level'
+  | 'id';

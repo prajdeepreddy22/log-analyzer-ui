@@ -45,6 +45,15 @@
             <app-upload-status-badge
               [status]="upload.status"
             />
+
+            @if (
+              upload.status === UploadStatus.FAILED &&
+              upload.errorMessage
+            ) {
+              <div class="upload-error">
+                {{ upload.errorMessage }}
+              </div>
+            }
           </td>
 
           <td class="metric">

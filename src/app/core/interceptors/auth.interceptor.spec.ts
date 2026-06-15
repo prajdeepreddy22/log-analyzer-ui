@@ -90,4 +90,24 @@ describe('authInterceptor', () => {
       return of(new HttpResponse());
     }).subscribe(() => done());
   });
+
+  it('does not duplicate an existing Bearer prefix', done => {
+    authStore.getToken.and.returnValue(
+      'Bearer jwt-token'
+    );
+
+    const request =
+      new HttpRequest(
+        'GET',
+        `${environment.apiBaseUrl}/uploads`
+      );
+
+    runInterceptor(request, req => {
+      expect(
+        req.headers.get('Authorization')
+      ).toBe('Bearer jwt-token');
+
+      return of(new HttpResponse());
+    }).subscribe(() => done());
+  });
 });

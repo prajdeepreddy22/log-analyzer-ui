@@ -33,6 +33,7 @@ import { LogAiPanelComponent } from '../../components/log-ai-panel/log-ai-panel.
 import { LogPaginationComponent } from '../../components/log-pagination/log-pagination.component';
 
 import { LogLevel } from '../../../../core/models/log/log-level.enum';
+import { LogSortField } from '../../../../core/models/log/log-search-request.model';
 
 @Component({
   selector: 'app-log-viewer-page',
@@ -174,7 +175,7 @@ export class LogViewerPageComponent
     const direction =
       params.get('direction');
 
-    if (sortBy) {
+    if (this.isLogSortField(sortBy)) {
 
       this.logStore.setSort(
         sortBy,
@@ -202,5 +203,15 @@ export class LogViewerPageComponent
     }
 
     return '';
+  }
+
+  private isLogSortField(
+    value: string | null
+  ): value is LogSortField {
+
+    return value === 'logSequence' ||
+      value === 'logTimestamp' ||
+      value === 'level' ||
+      value === 'id';
   }
 }

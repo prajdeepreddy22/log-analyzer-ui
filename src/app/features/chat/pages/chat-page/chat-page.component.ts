@@ -51,6 +51,8 @@ import {
 import {
   takeUntilDestroyed
 } from '@angular/core/rxjs-interop';
+import { getApiErrorMessage } from '../../../../core/utils/api-error-message.util';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-chat-page',
@@ -408,7 +410,9 @@ export class ChatPageComponent
             }
 
             this.chatStore.setError(
-              'Streaming chat failed. Please try again.'
+              error instanceof Error
+                ? error.message
+                : 'Streaming chat failed. Please try again.'
             );
 
             this.streamSubscription = undefined;
@@ -495,7 +499,7 @@ export class ChatPageComponent
           this.chatStore.setLoading(false);
         },
 
-        error: () => {
+        error: error => {
 
           this.chatStore.removeMessage(
             loadingId
@@ -504,7 +508,9 @@ export class ChatPageComponent
           this.chatStore.setLoading(false);
 
           this.chatStore.setError(
-            'Chat request failed. Please try again.'
+            error instanceof HttpErrorResponse
+              ? getApiErrorMessage(error)
+              : 'Chat request failed. Please try again.'
           );
         }
       });

@@ -41,6 +41,9 @@ export class RateLimitStoreService {
   private minuteExpiryRefreshQueued =
     false;
 
+  private dailyExpiryRefreshQueued =
+    false;
+
   readonly status =
     signal<RateLimitStatusModel | null>(null);
 
@@ -49,6 +52,9 @@ export class RateLimitStoreService {
 
   readonly dailyCountdownSeconds =
     signal<number | null>(null);
+
+  private minuteLongFormat =
+    false;
 
   readonly loading =
     signal(false);
@@ -227,9 +233,24 @@ export class RateLimitStoreService {
     this.stopDailyCountdown();
   }
 
+  reset(): void {
+
+    this.stopCountdowns();
+    this.status.set(null);
+    this.minuteCountdownSeconds.set(null);
+    this.dailyCountdownSeconds.set(null);
+    this.loading.set(false);
+    this.refreshing.set(false);
+    this.unavailable.set(false);
+    this.minuteExpiryRefreshQueued = false;
+    this.dailyExpiryRefreshQueued = false;
+    this.minuteLongFormat = false;
+  }
+
   refreshNow(): void {
 
     this.minuteExpiryRefreshQueued = false;
+    this.dailyExpiryRefreshQueued = false;
 
     this.refreshing.set(true);
 
@@ -262,6 +283,11 @@ export class RateLimitStoreService {
   ): void {
 
     this.status.set(status);
+
+    this.minuteLongFormat =
+      this.usesLongCountdownFormat(
+        status.minuteResetTimeFormatted
+      );
 
     this.startMinuteCountdown(
       status.minuteResetInSeconds
@@ -307,6 +333,7 @@ export class RateLimitStoreService {
         this.minuteCountdownSeconds.set(next);
 
         if (next === 0) {
+          this.stopMinuteCountdown();
           this.handleMinuteWindowExpired();
         }
       }, 1000);
@@ -356,18 +383,40 @@ export class RateLimitStoreService {
       Math.max(0, seconds)
     );
 
+    this.dailyExpiryRefreshQueued = false;
+
     this.dailyCountdownTimer =
       setInterval(() => {
 
-        this.dailyCountdownSeconds.update(current => {
+        const current =
+          this.dailyCountdownSeconds();
 
-          if (current === null || current <= 0) {
-            return 0;
-          }
+        if (current === null || current <= 0) {
+          return;
+        }
 
-          return current - 1;
-        });
+        const next =
+          Math.max(0, current - 1);
+
+        this.dailyCountdownSeconds.set(next);
+
+        if (next === 0) {
+          this.stopDailyCountdown();
+          this.handleDailyWindowExpired();
+        }
       }, 1000);
+  }
+
+  private handleDailyWindowExpired(): void {
+
+    if (this.dailyExpiryRefreshQueued) {
+      return;
+    }
+
+    this.dailyExpiryRefreshQueued = true;
+
+    // Keep the displayed usage until the backend confirms midnight reset.
+    this.refreshNow();
   }
 
   private percent(
@@ -408,7 +457,21 @@ export class RateLimitStoreService {
     seconds: number
   ): string {
 
-    return `${Math.max(0, seconds)}s`;
+    return this.minuteLongFormat
+      ? this.formatCountdown(seconds)
+      : `${Math.max(0, seconds)}s`;
+  }
+
+  private usesLongCountdownFormat(
+    value: string | undefined
+  ): boolean {
+
+    return Boolean(
+      value &&
+      /^\d{2}H \d{2}M \d{2}s$/i.test(
+        value.trim()
+      )
+    );
   }
 
   private padTime(

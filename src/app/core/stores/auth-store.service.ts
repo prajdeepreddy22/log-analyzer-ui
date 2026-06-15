@@ -187,6 +187,10 @@ export class AuthStoreService {
     const claims =
       this.decodeClaims(token);
 
+    if (!claims) {
+      return false;
+    }
+
     const expiresAt =
       claims?.['exp'];
 

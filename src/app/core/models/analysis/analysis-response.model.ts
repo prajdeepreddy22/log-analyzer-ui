@@ -22,7 +22,17 @@ export interface AnalysisResponseModel {
 
   analysis_status?: AnalysisStatus;
 
+  analysisStatus?: AnalysisStatus;
+
+  canForce?: boolean;
+
   message?: string;
+
+  details?: unknown;
+
+  errorMessage?: string;
+
+  error_message?: string;
 
   createdAt?: string;
 

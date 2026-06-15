@@ -24,6 +24,9 @@ export class UploadApiService {
   private readonly baseUrl =
     `${environment.apiBaseUrl}/uploads`;
 
+  private readonly uploadUrl =
+    `${environment.apiBaseUrl}/upload`;
+
   uploadFile(
     file: File
   ): Observable<HttpEvent<UploadResponseModel>> {
@@ -33,7 +36,7 @@ export class UploadApiService {
     formData.append('file', file);
 
     return this.http.post<UploadResponseModel>(
-      this.baseUrl,
+      this.uploadUrl,
       formData,
       {
         reportProgress: true,

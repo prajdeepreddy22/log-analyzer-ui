@@ -1,6 +1,7 @@
 import { HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { AuthStoreService } from '../stores/auth-store.service';
+import { environment } from '../../../environments/environment';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
@@ -11,19 +12,55 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     authStore.getToken();
 
   const isAuthRequest =
-    req.url.includes('/auth/login') ||
-    req.url.includes('/auth/register');
+    isPublicAuthRequest(req.url);
+
+  const normalizedToken =
+    token
+      ?.trim()
+      .replace(/^Bearer\s+/i, '') ||
+    null;
 
   // ===============================
   // ATTACH TOKEN
   // ===============================
-  const authReq = token && !isAuthRequest
+  const authReq = normalizedToken && !isAuthRequest
     ? req.clone({
         setHeaders: {
-          Authorization: `Bearer ${token}`
+          Authorization:
+            `Bearer ${normalizedToken}`
         }
       })
     : req;
 
+  if (!environment.production) {
+    console.debug(
+      '[Auth interceptor]',
+      {
+        url: req.url,
+        publicAuthRequest: isAuthRequest,
+        tokenPresent: !!normalizedToken,
+        authorization:
+          authReq.headers.has('Authorization')
+            ? 'Bearer [redacted]'
+            : 'not attached'
+      }
+    );
+  }
+
   return next(authReq);
 };
+
+function isPublicAuthRequest(
+  url: string
+): boolean {
+
+  const path =
+    url
+      .split('?')[0]
+      .replace(/\/+$/, '');
+
+  return (
+    path.endsWith('/auth/login') ||
+    path.endsWith('/auth/register')
+  );
+}

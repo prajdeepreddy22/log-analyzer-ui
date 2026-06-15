@@ -131,12 +131,6 @@ export class LoginComponent {
       },
 
       error: (error) => {
-
-        console.error(
-          'Login failed',
-          error
-        );
-
         this.errorMessage.set(
           getApiErrorMessage(error)
         );

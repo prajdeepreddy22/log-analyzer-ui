@@ -54,6 +54,9 @@ export class SidebarComponent {
   readonly profileError =
     signal<string | null>(null);
 
+  readonly profileSuccess =
+    signal<string | null>(null);
+
   @HostListener('document:click', ['$event'])
   onDocumentClick(
     event: MouseEvent
@@ -95,6 +98,7 @@ export class SidebarComponent {
 
     this.profileInvalid.set(false);
     this.profileError.set(null);
+    this.profileSuccess.set(null);
     this.profileOpen.set(true);
     this.closeMenu();
   }
@@ -107,6 +111,7 @@ export class SidebarComponent {
 
     this.profileOpen.set(false);
     this.profileError.set(null);
+    this.profileSuccess.set(null);
   }
 
   updateProfileDisplayName(
@@ -118,6 +123,7 @@ export class SidebarComponent {
 
     this.profileDisplayName.set(value);
     this.profileError.set(null);
+    this.profileSuccess.set(null);
 
     if (this.profileInvalid()) {
       this.profileInvalid.set(
@@ -136,6 +142,7 @@ export class SidebarComponent {
     );
 
     this.profileError.set(null);
+    this.profileSuccess.set(null);
 
     if (this.profileInvalid()) {
       return;
@@ -153,10 +160,13 @@ export class SidebarComponent {
       .subscribe({
 
         next: () => {
-          this.profileOpen.set(false);
+          this.profileSuccess.set(
+            'Profile updated successfully.'
+          );
         },
 
         error: error => {
+          this.profileSuccess.set(null);
           this.profileError.set(
             getApiErrorMessage(error)
           );

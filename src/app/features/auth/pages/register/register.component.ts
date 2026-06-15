@@ -142,7 +142,7 @@ export class RegisterComponent {
     );
 
     this.passwordInvalid.set(
-      password.length < this.passwordMinLength
+      !this.isValidPassword(password)
     );
 
     this.confirmPasswordInvalid.set(
@@ -193,12 +193,6 @@ export class RegisterComponent {
         },
 
         error: err => {
-
-          console.error(
-            'Registration failed',
-            err
-          );
-
           this.errorMessage.set(
             getApiErrorMessage(err)
           );
@@ -281,7 +275,7 @@ export class RegisterComponent {
 
     if (this.submitted()) {
       this.passwordInvalid.set(
-        value.length < this.passwordMinLength
+        !this.isValidPassword(value)
       );
 
       this.passwordsMismatch.set(
@@ -328,15 +322,28 @@ export class RegisterComponent {
 
   passwordHelpText(): string {
 
-    return `Min ${this.passwordMinLength} characters required`;
+    return 'Use 8+ characters with uppercase, lowercase, and a special character';
   }
 
   private isValidEmail(
     email: string
   ): boolean {
 
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
+    return /^[^\s@]+@[^\s@]+\.(com|in)$/i.test(
       email
+    );
+  }
+
+  private isValidPassword(
+    password: string
+  ): boolean {
+
+    return (
+      password.length >=
+        this.passwordMinLength &&
+      /[A-Z]/.test(password) &&
+      /[a-z]/.test(password) &&
+      /[^A-Za-z0-9]/.test(password)
     );
   }
 

@@ -24,6 +24,7 @@ import { AnalysisStoreService } from '../stores/analysis-store.service';
 import { UploadStoreService } from '../stores/upload-store.service';
 import { LogStoreService } from '../stores/log-store.service';
 import { ChatStreamingService } from './chat-streaming.service';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -91,9 +92,27 @@ export class AuthService {
   // =====================================================
   private handleAuthSuccess(response: AuthResponse): void {
 
-    if (!response?.token) return;
+    const token =
+      response?.token;
 
-    this.authStore.setToken(response.token);
+    if (!token?.trim()) {
+      throw new Error(
+        'Authentication succeeded but no access token was returned.'
+      );
+    }
+
+    this.clearTenantState();
+    this.authStore.setToken(token);
+
+    if (!environment.production) {
+      console.debug(
+        '[Auth] JWT stored successfully.',
+        {
+          storageKey: 'logai_token',
+          tokenPresent: true
+        }
+      );
+    }
 
     this.rateLimitStore.refreshNow();
 
@@ -145,20 +164,23 @@ export class AuthService {
   logout(): void {
 
     this.authStore.clear();
+    this.clearTenantState();
+
+    this.router.navigate(['/login']);
+  }
+
+  private clearTenantState(): void {
+
     this.rateLimitStore.stopCountdowns();
     this.rateLimitStore.stopPolling();
+    this.rateLimitStore.reset();
     this.chatStore.clearChat();
     this.chatStore.setLoading(false);
     this.chatStore.setStreaming(false);
-    this.analysisStore.stopPolling();
-    this.uploadStore.stopActiveWork();
-    this.logStore.stopActiveRequests();
+    this.analysisStore.reset();
+    this.uploadStore.reset();
+    this.logStore.reset();
     this.chatStreaming.closeAll();
-
-    // optional cleanup hook for future stores
-    // resetAuthStore();
-
-    this.router.navigate(['/login']);
   }
 
   // =====================================================

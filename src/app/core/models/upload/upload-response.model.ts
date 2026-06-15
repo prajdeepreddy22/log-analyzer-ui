@@ -11,4 +11,5 @@ export interface UploadResponseModel {
   totalLogs?: number;
   errorCount?: number;
   warnCount?: number;
+  errorMessage?: string;
 }

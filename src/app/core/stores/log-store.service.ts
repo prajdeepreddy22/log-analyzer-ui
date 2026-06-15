@@ -19,6 +19,9 @@ import { LogStatsResponseModel } from '../models/log/log-stats-response.model';
 import { LogSearchRequestModel } from '../models/log/log-search-request.model';
 
 import { LogLevel } from '../models/log/log-level.enum';
+import { LogSortField } from '../models/log/log-search-request.model';
+import { HttpErrorResponse } from '@angular/common/http';
+import { getApiErrorMessage } from '../utils/api-error-message.util';
 
 @Injectable({
   providedIn: 'root'
@@ -93,7 +96,7 @@ export class LogStoreService {
   // =========================
 
   readonly sortBy =
-    signal('logTimestamp');
+    signal<LogSortField>('logTimestamp');
 
   readonly direction =
     signal<'asc' | 'desc'>('desc');
@@ -174,11 +177,11 @@ export class LogStoreService {
         },
 
         error: err => {
-
-          console.error(err);
-
           this.error.set(
-            'Failed to load logs'
+            this.errorMessage(
+              err,
+              'Failed to load logs.'
+            )
           );
         }
       });
@@ -264,11 +267,11 @@ export class LogStoreService {
         },
 
         error: err => {
-
-          console.error(err);
-
           this.error.set(
-            'Failed to search logs'
+            this.errorMessage(
+              err,
+              'Failed to search logs.'
+            )
           );
         }
       });
@@ -310,8 +313,12 @@ export class LogStoreService {
         },
 
         error: err => {
-
-          console.error(err);
+          this.error.set(
+            this.errorMessage(
+              err,
+              'Failed to load log statistics.'
+            )
+          );
         }
       });
 
@@ -420,7 +427,7 @@ export class LogStoreService {
   // =========================
 
   setSort(
-    sortBy: string,
+    sortBy: LogSortField,
     direction: 'asc' | 'desc'
   ): void {
 
@@ -451,5 +458,33 @@ export class LogStoreService {
 
     this.loading.set(false);
     this.statsLoading.set(false);
+  }
+
+  reset(): void {
+
+    this.stopActiveRequests();
+    this.logs.set([]);
+    this.selectedLog.set(null);
+    this.highlightedLogId.set(null);
+    this.stats.set(null);
+    this.error.set(null);
+    this.keyword.set('');
+    this.level.set('');
+    this.serviceName.set('');
+    this.page.set(0);
+    this.totalPages.set(0);
+    this.totalElements.set(0);
+    this.sortBy.set('logTimestamp');
+    this.direction.set('desc');
+  }
+
+  private errorMessage(
+    error: unknown,
+    fallback: string
+  ): string {
+
+    return error instanceof HttpErrorResponse
+      ? getApiErrorMessage(error)
+      : fallback;
   }
 }

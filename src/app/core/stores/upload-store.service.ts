@@ -23,6 +23,8 @@ import { UploadApiService } from '../api/upload-api.service';
 import { UploadResponseModel } from '../models/upload/upload-response.model';
 import { UploadStatusResponseModel } from '../models/upload/upload-status-response.model';
 import { UploadStatus } from '../models/upload/upload-status.enum';
+import { getApiErrorMessage } from '../utils/api-error-message.util';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root'
@@ -218,11 +220,11 @@ export class UploadStoreService {
         },
 
         error: err => {
-
-          console.error(err);
-
           this.error.set(
-            'Failed to load uploads'
+            this.errorMessage(
+              err,
+              'Failed to load uploads.'
+            )
           );
         }
       });
@@ -237,15 +239,6 @@ export class UploadStoreService {
   uploadFile(
     file: File
   ): void {
-
-    if (this.isDuplicateUpload(file)) {
-
-      this.error.set(
-        'This file is already in upload history.'
-      );
-
-      return;
-    }
 
     this.uploading.set(true);
 
@@ -336,11 +329,11 @@ export class UploadStoreService {
         // =====================
 
         error: err => {
-
-          console.error(err);
-
           this.error.set(
-            'Upload failed'
+            this.errorMessage(
+              err,
+              'Upload failed.'
+            )
           );
         }
       });
@@ -414,11 +407,11 @@ export class UploadStoreService {
         },
 
         error: err => {
-
-          console.error(err);
-
           this.error.set(
-            'Failed to delete upload'
+            this.errorMessage(
+              err,
+              'Failed to delete upload.'
+            )
           );
         }
       });
@@ -472,11 +465,15 @@ export class UploadStoreService {
         },
 
         error: err => {
-
-          console.error(err);
-
           this.pollingSubscriptions.delete(
             uploadId
+          );
+
+          this.error.set(
+            this.errorMessage(
+              err,
+              'Failed to refresh upload status.'
+            )
           );
         },
 
@@ -515,6 +512,18 @@ export class UploadStoreService {
     this.uploadFileName.set(null);
   }
 
+  reset(): void {
+
+    this.stopActiveWork();
+    this.clearUploadCache();
+    this.uploads.set([]);
+    this.selectedUpload.set(null);
+    this.error.set(null);
+    this.page.set(0);
+    this.totalPages.set(0);
+    this.totalElements.set(0);
+  }
+
   // =========================
   // UPDATE STATUS
   // =========================
@@ -549,7 +558,10 @@ export class UploadStoreService {
 
             errorCount: status.errorCount,
 
-            warnCount: status.warnCount
+            warnCount: status.warnCount,
+
+            errorMessage:
+              status.errorMessage
           };
         }
 
@@ -568,17 +580,6 @@ export class UploadStoreService {
     }
   }
 
-  private isDuplicateUpload(
-    file: File
-  ): boolean {
-
-    return this.uploads().some(upload =>
-      upload.fileName === file.name &&
-      upload.fileSize === file.size &&
-      upload.status !== UploadStatus.FAILED
-    );
-  }
-
   private cacheUpload(
     upload: UploadResponseModel
   ): void {
@@ -594,5 +595,37 @@ export class UploadStoreService {
   ): string {
 
     return `logai_upload_${uploadId}`;
+  }
+
+  private clearUploadCache(): void {
+
+    const keys: string[] = [];
+
+    for (
+      let index = 0;
+      index < sessionStorage.length;
+      index++
+    ) {
+      const key =
+        sessionStorage.key(index);
+
+      if (key?.startsWith('logai_upload_')) {
+        keys.push(key);
+      }
+    }
+
+    keys.forEach(key =>
+      sessionStorage.removeItem(key)
+    );
+  }
+
+  private errorMessage(
+    error: unknown,
+    fallback: string
+  ): string {
+
+    return error instanceof HttpErrorResponse
+      ? getApiErrorMessage(error)
+      : fallback;
   }
 }

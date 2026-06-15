@@ -92,7 +92,16 @@
   @if (analysisStore.error()) {
 
     <div class="state-card error">
-      {{ analysisStore.error() }}
+      <span>{{ analysisStore.error() }}</span>
+
+      <button
+        type="button"
+        class="btn"
+        [disabled]="isProcessing() || !uploadId()"
+        (click)="runAnalysis()"
+      >
+        Retry Analysis
+      </button>
     </div>
   }
 

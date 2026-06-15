@@ -1,19 +1,23 @@
 import { TestBed } from '@angular/core/testing';
 
 import {
-  ChatStreamingService
+  ChatStreamingService,
+  ChatStreamChunk
 } from './chat-streaming.service';
 import { AuthStoreService } from '../stores/auth-store.service';
 import { environment } from '../../../environments/environment';
 
 class MockEventSource {
   static instances: MockEventSource[] = [];
+  static readonly CONNECTING = 0;
+  static readonly OPEN = 1;
+  static readonly CLOSED = 2;
 
   readonly url: string;
   readyState: number = EventSource.OPEN;
   onopen: (() => void) | null = null;
   onmessage: ((event: MessageEvent<string>) => void) | null = null;
-  onerror: (() => void) | null = null;
+  onerror: ((event: Event) => void) | null = null;
   close = jasmine.createSpy('close');
   listeners = new Map<string, Array<(event: Event) => void>>();
 
@@ -108,7 +112,7 @@ describe('ChatStreamingService', () => {
       MockEventSource.instances[0];
 
     expect(source.url).toBe(
-      `${environment.apiBaseUrl}/chat/stream?uploadId=upload-1&message=Why+did+it+fail%3F&token=jwt-token`
+      `${environment.apiBaseUrl}/chat/stream?message=Why+did+it+fail%3F&uploadId=upload-1&token=jwt-token`
     );
 
     subscription.unsubscribe();
@@ -205,7 +209,7 @@ describe('ChatStreamingService', () => {
       })
     );
 
-    source.onerror?.();
+    source.onerror?.(new Event('error'));
   });
 
   it('fails before opening SSE when token is missing', done => {
@@ -225,7 +229,7 @@ describe('ChatStreamingService', () => {
       });
   });
 
-  it('stops reconnecting after the configured transient error limit', done => {
+  it('closes on the first transport error to prevent reconnect loops', done => {
     authStore.getToken.and.returnValue('jwt-token');
 
     service
@@ -250,9 +254,103 @@ describe('ChatStreamingService', () => {
     source.readyState =
       EventSource.CONNECTING;
 
-    source.onerror?.();
-    source.onerror?.();
-    source.onerror?.();
+    source.onerror?.(new Event('error'));
+  });
+
+  it('closes a 204-style terminal EventSource without reconnecting', done => {
+    authStore.getToken.and.returnValue('jwt-token');
+
+    const chunks: ChatStreamChunk[] = [];
+
+    service
+      .stream('upload-1', 'question')
+      .subscribe({
+        next: chunk => {
+          chunks.push(chunk);
+        },
+        error: () => {
+          fail('HTTP 204 duplicate reconnect should complete');
+        },
+        complete: () => {
+          const source =
+            MockEventSource.instances[0];
+
+          expect(source.readyState)
+            .toBe(EventSource.CLOSED);
+          expect(source.close)
+            .toHaveBeenCalledTimes(1);
+          expect(MockEventSource.instances.length)
+            .toBe(1);
+          expect(chunks).toEqual([
+            {
+              content: '',
+              completed: true
+            }
+          ]);
+          done();
+        }
+      });
+
+    const source =
+      MockEventSource.instances[0];
+
+    source.readyState =
+      EventSource.CLOSED;
+
+    source.onerror?.(new Event('error'));
+  });
+
+  it('closes an existing stream before opening another one', () => {
+    authStore.getToken.and.returnValue('jwt-token');
+
+    const first =
+      service.stream('upload-1', 'first').subscribe();
+
+    const firstSource =
+      MockEventSource.instances[0];
+
+    const second =
+      service.stream('upload-1', 'second').subscribe();
+
+    expect(firstSource.close)
+      .toHaveBeenCalled();
+    expect(MockEventSource.instances.length)
+      .toBe(2);
+
+    first.unsubscribe();
+    second.unsubscribe();
+  });
+
+  it('surfaces the backend named error event and closes the stream', done => {
+    authStore.getToken.and.returnValue('jwt-token');
+
+    service
+      .stream('upload-1', 'question')
+      .subscribe({
+        error: error => {
+          const source =
+            MockEventSource.instances[0];
+
+          expect(error.message).toBe(
+            'AI provider timed out'
+          );
+
+          expect(source.close)
+            .toHaveBeenCalled();
+
+          done();
+        }
+      });
+
+    const source =
+      MockEventSource.instances[0];
+
+    source.onerror?.({
+      data: JSON.stringify({
+        content: 'AI provider timed out',
+        completed: true
+      })
+    } as MessageEvent<string>);
   });
 
   it('closes all active streams during session cleanup', () => {

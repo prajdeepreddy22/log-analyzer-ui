@@ -44,6 +44,7 @@
                   "with": "src/environments/environment.production.ts"
                 }
               ],
+              "sourceMap": false,
               "budgets": [
                 {
                   "type": "initial",

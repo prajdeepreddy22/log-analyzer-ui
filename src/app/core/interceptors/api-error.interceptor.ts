@@ -11,6 +11,7 @@ import { throwError } from 'rxjs';
 import { AuthStoreService } from '../stores/auth-store.service';
 import { getApiErrorMessage } from '../utils/api-error-message.util';
 import { SessionEventsService } from '../services/session-events.service';
+import { environment } from '../../../environments/environment';
 
 export const apiErrorInterceptor: HttpInterceptorFn = (
   req,
@@ -29,10 +30,20 @@ export const apiErrorInterceptor: HttpInterceptorFn = (
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
 
+      if (!isApiRequest(req.url)) {
+        return throwError(() => error);
+      }
+
       const message =
         getApiErrorMessage(error);
 
-      if (error.status === 401) {
+      const hadSession =
+        authStore.isAuthenticated();
+
+      if (
+        error.status === 401 &&
+        hadSession
+      ) {
 
         authStore.clear();
 
@@ -56,3 +67,17 @@ export const apiErrorInterceptor: HttpInterceptorFn = (
     })
   );
 };
+
+function isApiRequest(
+  url: string
+): boolean {
+
+  const baseUrl =
+    environment.apiBaseUrl
+      .replace(/\/+$/, '');
+
+  return (
+    url === baseUrl ||
+    url.startsWith(`${baseUrl}/`)
+  );
+}

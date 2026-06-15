@@ -16,8 +16,6 @@ export interface ChatStreamChunk {
   completed: boolean;
 }
 
-const MAX_TRANSIENT_ERRORS = 2;
-
 export class ChatStreamError extends Error {
 
   constructor(
@@ -54,6 +52,8 @@ export class ChatStreamingService {
     message: string
   ): Observable<ChatStreamChunk> {
 
+    this.closeAll();
+
     return new Observable<ChatStreamChunk>(
       observer => {
 
@@ -72,8 +72,8 @@ export class ChatStreamingService {
 
         const params =
           new URLSearchParams({
-            uploadId,
             message,
+            uploadId,
             token
           });
 
@@ -84,11 +84,16 @@ export class ChatStreamingService {
 
         this.activeSources.add(source);
 
-        let transientErrors = 0;
         let closedSuccessfully = false;
+        let sourceClosed = false;
 
         const closeSource = (): void => {
 
+          if (sourceClosed) {
+            return;
+          }
+
+          sourceClosed = true;
           this.activeSources.delete(source);
           source.close();
         };
@@ -132,8 +137,6 @@ export class ChatStreamingService {
           }
 
           try {
-            transientErrors = 0;
-
             const chunk =
               parseChunk(event.data);
 
@@ -146,7 +149,11 @@ export class ChatStreamingService {
           } catch (error) {
             closedSuccessfully = true;
             closeSource();
-            observer.error(error);
+            observer.error(
+              new ChatStreamError(
+                'The streaming response could not be read.'
+              )
+            );
           }
         };
 
@@ -172,29 +179,55 @@ export class ChatStreamingService {
             } catch (error) {
               closedSuccessfully = true;
               closeSource();
-              observer.error(error);
+              observer.error(
+                new ChatStreamError(
+                  'The streaming response could not be read.'
+                )
+              );
             }
           }
         );
 
-        source.onerror = () => {
+        source.onerror = event => {
 
           if (closedSuccessfully) {
             closeSource();
             return;
           }
 
-          transientErrors += 1;
+          const data =
+            (event as MessageEvent<string>)
+              .data;
+
+          if (typeof data === 'string' && data) {
+            try {
+              const chunk =
+                parseChunk(data);
+
+              closedSuccessfully = true;
+              closeSource();
+
+              observer.error(
+                new ChatStreamError(
+                  chunk.content ||
+                  'Streaming chat failed. Please try again.'
+                )
+              );
+              return;
+            } catch {
+              // Fall through to the generic transport error.
+            }
+          }
 
           if (
-            source.readyState === EventSource.CONNECTING &&
-            transientErrors <= MAX_TRANSIENT_ERRORS
+            source.readyState ===
+            EventSource.CLOSED
           ) {
+            closeSuccessfully();
             return;
           }
 
           closedSuccessfully = true;
-
           closeSource();
 
           observer.error(

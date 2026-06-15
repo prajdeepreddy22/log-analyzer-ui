@@ -49,6 +49,19 @@ Create a `/api/*` behavior that forwards to the backend origin with:
 
 The default behavior should serve the S3 frontend origin.
 
+The frontend already includes `/api` in every production request. Configure the
+CloudFront backend origin with no `/api` origin path when the backend itself
+serves routes under `/api`. For example:
+
+```text
+Browser request: /api/uploads
+CloudFront behavior: /api/*
+Backend request: /api/uploads
+```
+
+Do not configure an additional `/api` origin path, or CloudFront may duplicate
+the API prefix before forwarding requests.
+
 If the frontend and backend are deployed on separate domains without a proxy,
 change `src/environments/environment.production.ts` before building:
 
@@ -68,17 +81,46 @@ Configure the host to return `index.html` for unknown frontend routes such as:
 ```text
 /dashboard
 /uploads
+/logs
 /logs/:uploadId
+/analysis
+/analysis/:uploadId
+/chat
+/rate-limit
+/login
+/register
+```
+
+Create a CloudFront Function using:
+
+```text
+deployment/cloudfront-spa-rewrite.js
+```
+
+Attach it to the viewer-request event of the default S3 frontend behavior
+only. Do not attach it to the `/api/*` behavior. The function rewrites `/`,
+all extensionless Angular routes, and dynamic routes to `/index.html`, while
+leaving JavaScript, CSS, images, fonts, and other files unchanged.
+
+This covers every current route:
+
+```text
+/
+/login
+/register
+/dashboard
+/uploads
+/logs
+/logs/:uploadId
+/analysis
 /analysis/:uploadId
 /chat
 /rate-limit
 ```
 
-For CloudFront, configure custom error responses for S3 `403` and `404`:
-
-- Response page: `/index.html`
-- Response code: `200`
-- Error caching minimum TTL: `0`
+Using a frontend-only rewrite is preferred over distribution-wide custom
+403/404 responses because API `404` responses must remain API errors rather
+than being replaced with Angular HTML.
 
 ## Backend Configuration
 
@@ -96,11 +138,18 @@ POST  /api/auth/register
 GET   /api/auth/me
 PATCH /api/auth/profile
 GET   /api/chat/stream
+GET   /api/actuator/health
 ```
 
 The SSE endpoint receives `message`, `uploadId`, and `token` as URL-encoded
 query parameters. Use HTTPS because the JWT is present in the query string.
 Configure proxy and application logs so query strings are not retained.
+Disable caching for SSE, forward all query strings, and use an origin response
+timeout that exceeds the maximum expected chat response duration. The frontend
+closes the EventSource on completion, cancellation, navigation, logout, and the
+first transport error, preventing browser reconnect loops. A terminal
+`EventSource.CLOSED` result with no backend error payload is treated as a
+completed duplicate reconnect, matching the backend's HTTP 204 behavior.
 
 ## Environment Variables
 
@@ -134,3 +183,4 @@ Verify:
 8. Stopping or leaving SSE chat closes the connection.
 9. Rate-limit minute and daily counters update.
 10. Logout clears the session and returns to `/login`.
+11. `GET /api/actuator/health` returns `200` with `{"status":"UP"}`.

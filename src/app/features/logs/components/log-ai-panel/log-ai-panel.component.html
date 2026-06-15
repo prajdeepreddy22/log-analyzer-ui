@@ -54,7 +54,16 @@
   @if (analysisStore.error()) {
 
     <div class="error-state">
-      {{ analysisStore.error() }}
+      <span>{{ analysisStore.error() }}</span>
+
+      <button
+        class="retry-btn"
+        type="button"
+        [disabled]="analysisStore.isProcessing()"
+        (click)="retryAnalysis()"
+      >
+        Retry
+      </button>
     </div>
   }
 

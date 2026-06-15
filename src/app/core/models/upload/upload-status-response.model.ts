@@ -6,4 +6,5 @@ export interface UploadStatusResponseModel {
   totalLogs: number;
   errorCount: number;
   warnCount: number;
+  errorMessage?: string;
 }

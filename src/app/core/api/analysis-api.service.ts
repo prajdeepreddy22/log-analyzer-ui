@@ -35,9 +35,9 @@ export class AnalysisApiService {
   triggerAnalysis(
     uploadId: string,
     force = false
-  ): Observable<AnalysisResponseModel> {
+  ): Observable<AnalysisResponseModel | null> {
 
-    return this.http.post<AnalysisResponseModel>(
+    return this.http.post<AnalysisResponseModel | null>(
       `${this.baseUrl}/${uploadId}?force=${force}`,
       {}
     );

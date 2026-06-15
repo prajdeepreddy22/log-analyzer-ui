@@ -77,6 +77,15 @@ tbody tr:hover {
   color: var(--amber);
 }
 
+.upload-error {
+  max-width: 220px;
+  margin-top: 6px;
+  color: var(--red);
+  font-size: 12px;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
 .actions {
   display: flex;
   flex-wrap: wrap;

@@ -255,6 +255,15 @@
             </div>
           }
 
+          @if (profileSuccess()) {
+            <div
+              class="profile-success"
+              role="status"
+            >
+              {{ profileSuccess() }}
+            </div>
+          }
+
           <div class="profile-actions">
 
             <button

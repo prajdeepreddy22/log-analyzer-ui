@@ -25,4 +25,33 @@ describe('TokenStorageUtil', () => {
     expect(TokenStorageUtil.getToken()).toBeNull();
     expect(TokenStorageUtil.hasToken()).toBeFalse();
   });
+
+  it('migrates a legacy token storage key', () => {
+    localStorage.setItem(
+      'token',
+      'legacy-jwt-token'
+    );
+
+    expect(
+      TokenStorageUtil.getToken()
+    ).toBe('legacy-jwt-token');
+
+    expect(
+      localStorage.getItem('logai_token')
+    ).toBe('legacy-jwt-token');
+
+    expect(
+      localStorage.getItem('token')
+    ).toBeNull();
+  });
+
+  it('removes an accidental Bearer prefix before storage', () => {
+    TokenStorageUtil.saveToken(
+      'Bearer jwt-token'
+    );
+
+    expect(
+      TokenStorageUtil.getToken()
+    ).toBe('jwt-token');
+  });
 });

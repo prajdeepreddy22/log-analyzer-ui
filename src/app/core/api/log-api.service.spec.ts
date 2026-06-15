@@ -8,6 +8,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { LogApiService } from './log-api.service';
 import { environment } from '../../../environments/environment';
 import { LogLevel } from '../models/log/log-level.enum';
+import { LogSearchRequestModel } from '../models/log/log-search-request.model';
 
 describe('LogApiService', () => {
   let service: LogApiService;
@@ -57,14 +58,14 @@ describe('LogApiService', () => {
   });
 
   it('uses the backend POST search endpoint and request body', () => {
-    const body = {
+    const body: LogSearchRequestModel = {
       keyword: 'NullPointerException',
       level: LogLevel.ERROR,
       serviceName: 'AuthService',
       page: 0,
       size: 20,
       sortBy: 'logTimestamp',
-      direction: 'desc' as const
+      direction: 'desc'
     };
 
     service.searchLogs('upload-2', body).subscribe();

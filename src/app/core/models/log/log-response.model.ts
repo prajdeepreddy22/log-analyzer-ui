@@ -6,7 +6,7 @@ export interface LogResponseModel {
 
   logSequence: number;
 
-  logTimestamp: string;
+  logTimestamp: string | null;
 
   level: LogLevel;
 

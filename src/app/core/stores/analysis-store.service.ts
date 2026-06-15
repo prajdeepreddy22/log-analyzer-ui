@@ -11,6 +11,7 @@ import {
   interval,
   startWith,
   switchMap,
+  take,
   takeWhile
 } from 'rxjs';
 
@@ -22,6 +23,8 @@ import {
   AnalysisStatus,
   AnalysisStatusResponseModel
 } from '../models/analysis/analysis-status-response.model';
+import { getApiErrorMessage } from '../utils/api-error-message.util';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root'
@@ -36,6 +39,9 @@ export class AnalysisStoreService {
 
   private pollingSub:
     Subscription | null = null;
+
+  private static readonly MAX_POLL_ATTEMPTS =
+    120;
 
   // =========================
   // STATE
@@ -113,12 +119,15 @@ export class AnalysisStoreService {
         next: response => {
 
           const status =
-            this.normalizeStatus(response);
+            this.normalizeStatus(
+              response,
+              'QUEUED'
+            );
 
           this.status.set(status);
 
           this.statusMessage.set(
-            response.message ||
+            response?.message ||
             this.defaultStatusMessage(status)
           );
 
@@ -129,9 +138,13 @@ export class AnalysisStoreService {
 
           if (status === 'FAILED') {
             this.error.set(
-              response.message ||
-              'Analysis failed. Retry the analysis when the backend is ready.'
+              this.analysisFailureMessage(response)
             );
+            return;
+          }
+
+          if (status === 'NOT_STARTED') {
+            this.analysis.set(null);
             return;
           }
 
@@ -139,11 +152,11 @@ export class AnalysisStoreService {
         },
 
         error: err => {
-
-          console.error(err);
-
           this.error.set(
-            'Failed to trigger analysis'
+            this.httpFailureMessage(
+              err,
+              'Failed to trigger analysis.'
+            )
           );
 
           this.statusMessage.set(null);
@@ -196,28 +209,32 @@ export class AnalysisStoreService {
             this.analysis.set(null);
 
             this.startPolling(uploadId);
+            return;
+          }
+
+          if (status === 'NOT_STARTED') {
+            this.analysis.set(null);
           }
         },
 
         error: err => {
-
-          console.error(err);
-
           if (err.status === 404) {
 
             this.analysis.set(null);
-
             this.status.set(null);
-
             this.statusMessage.set(null);
-
-            this.error.set(null);
+            this.error.set(
+              this.resourceUnavailableMessage()
+            );
 
             return;
           }
 
           this.error.set(
-            'Failed to load analysis'
+            this.httpFailureMessage(
+              err,
+              'Failed to load analysis.'
+            )
           );
 
           this.statusMessage.set(null);
@@ -272,8 +289,7 @@ export class AnalysisStoreService {
 
           if (status === 'FAILED') {
             this.error.set(
-              response.message ||
-              'Analysis failed. Retry the analysis when the backend is ready.'
+              this.analysisFailureMessage(response)
             );
             return;
           }
@@ -284,20 +300,21 @@ export class AnalysisStoreService {
         },
 
         error: err => {
-
-          console.error(err);
-
           if (err.status === 404) {
-            this.status.set('NOT_STARTED');
-            this.statusMessage.set(
-              this.defaultStatusMessage('NOT_STARTED')
+            this.stopPolling();
+            this.status.set(null);
+            this.statusMessage.set(null);
+            this.error.set(
+              this.resourceUnavailableMessage()
             );
-            this.error.set(null);
             return;
           }
 
           this.error.set(
-            'Failed to load analysis status'
+            this.httpFailureMessage(
+              err,
+              'Failed to load analysis status.'
+            )
           );
 
           this.statusMessage.set(null);
@@ -324,8 +341,12 @@ export class AnalysisStoreService {
         },
 
         error: err => {
-
-          console.error(err);
+          this.error.set(
+            this.httpFailureMessage(
+              err,
+              'Failed to load analysis history.'
+            )
+          );
         }
       });
   }
@@ -370,10 +391,15 @@ export class AnalysisStoreService {
 
             return (
               status !== 'COMPLETED' &&
-              status !== 'FAILED'
+              status !== 'FAILED' &&
+              status !== 'NOT_STARTED'
             );
           },
           true
+        ),
+
+        take(
+          AnalysisStoreService.MAX_POLL_ATTEMPTS
         )
       )
       .subscribe({
@@ -410,23 +436,55 @@ export class AnalysisStoreService {
             this.stopPolling();
 
             this.error.set(
-              response.message ||
-              'Analysis failed. Retry the analysis when the backend is ready.'
+              this.analysisFailureMessage(response)
+            );
+          }
+
+          if (
+            status ===
+            'NOT_STARTED'
+          ) {
+            this.stopPolling();
+            this.statusMessage.set(
+              this.defaultStatusMessage(status)
             );
           }
         },
 
         error: err => {
+          this.stopPolling();
 
-          console.error(err);
+          if (
+            err instanceof HttpErrorResponse &&
+            err.status === 404
+          ) {
+            this.status.set(null);
+            this.statusMessage.set(null);
+            this.error.set(
+              this.resourceUnavailableMessage()
+            );
+            return;
+          }
 
           this.error.set(
-            'Analysis polling failed'
+            this.httpFailureMessage(
+              err,
+              'Analysis status polling failed.'
+            )
           );
 
           this.statusMessage.set(null);
+        },
 
-          this.stopPolling();
+        complete: () => {
+          this.pollingSub = null;
+
+          if (this.isProgressStatus(this.status())) {
+            this.statusMessage.set(null);
+            this.error.set(
+              'Analysis is taking longer than expected. Refresh the status or try again later.'
+            );
+          }
         }
       });
   }
@@ -438,6 +496,18 @@ export class AnalysisStoreService {
     this.pollingSub = null;
   }
 
+  reset(): void {
+
+    this.stopPolling();
+    this.analysis.set(null);
+    this.history.set([]);
+    this.loading.set(false);
+    this.status.set(null);
+    this.statusMessage.set(null);
+    this.error.set(null);
+    this.historyLoading.set(false);
+  }
+
   private normalizeStatus(
     response:
       | AnalysisResponseModel
@@ -447,11 +517,55 @@ export class AnalysisStoreService {
     fallback: AnalysisStatus = 'PROCESSING'
   ): AnalysisStatus {
 
-    return (
+    const status = (
       response?.status ||
       response?.analysis_status ||
+      response?.analysisStatus ||
       fallback
+    ).toUpperCase();
+
+    if (status === 'CACHED') {
+      return 'COMPLETED';
+    }
+
+    if (status === 'RETRY') {
+      return 'RETRYING';
+    }
+
+    return status as AnalysisStatus;
+  }
+
+  private analysisFailureMessage(
+    response:
+      | AnalysisResponseModel
+      | AnalysisStatusResponseModel
+      | null
+      | undefined
+  ): string {
+
+    return (
+      response?.errorMessage ||
+      response?.error_message ||
+      response?.message ||
+      'Analysis failed. Retry the analysis or inspect the backend AI provider logs for the failure reason.'
     );
+  }
+
+  private httpFailureMessage(
+    error: unknown,
+    fallback: string
+  ): string {
+
+    if (error instanceof HttpErrorResponse) {
+      return getApiErrorMessage(error);
+    }
+
+    return fallback;
+  }
+
+  private resourceUnavailableMessage(): string {
+
+    return 'The requested upload is unavailable.';
   }
 
   private isProgressStatus(

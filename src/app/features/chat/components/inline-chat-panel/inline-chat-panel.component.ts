@@ -37,6 +37,8 @@ import {
 import {
   finalize
 } from 'rxjs';
+import { HttpErrorResponse } from '@angular/common/http';
+import { getApiErrorMessage } from '../../../../core/utils/api-error-message.util';
 
 @Component({
   selector: 'app-inline-chat-panel',
@@ -167,7 +169,7 @@ export class InlineChatPanelComponent {
           this.chatStore.setLoading(false);
         },
 
-        error: () => {
+        error: error => {
 
           this.chatStore.removeMessage(
             loadingId
@@ -176,7 +178,9 @@ export class InlineChatPanelComponent {
           this.chatStore.setLoading(false);
 
           this.chatStore.setError(
-            'Chat request failed. Please try again.'
+            error instanceof HttpErrorResponse
+              ? getApiErrorMessage(error)
+              : 'Chat request failed. Please try again.'
           );
         }
       });
