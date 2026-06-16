@@ -1,7 +1,8 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  inject
+  inject,
+  signal
 } from '@angular/core';
 
 import { CommonModule } from '@angular/common';
@@ -44,6 +45,9 @@ export class UploadHistoryTableComponent {
   readonly UploadStatus =
     UploadStatus;
 
+  readonly pendingDeleteUpload =
+    signal<UploadResponseModel | null>(null);
+
   formatSize(
     upload: UploadResponseModel
   ): string {
@@ -82,17 +86,27 @@ export class UploadHistoryTableComponent {
     upload: UploadResponseModel
   ): void {
 
-    const confirmed =
-      window.confirm(
-        `Delete ${upload.fileName}? This removes the upload and its parsed log data.`
-      );
+    this.pendingDeleteUpload.set(upload);
+  }
 
-    if (!confirmed) {
+  cancelDeleteUpload(): void {
+
+    this.pendingDeleteUpload.set(null);
+  }
+
+  confirmDeleteUpload(): void {
+
+    const upload =
+      this.pendingDeleteUpload();
+
+    if (!upload) {
       return;
     }
 
     this.uploadStore.deleteUpload(
       upload.uploadId
     );
+
+    this.pendingDeleteUpload.set(null);
   }
 }

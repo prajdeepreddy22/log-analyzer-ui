@@ -287,6 +287,30 @@ h1 {
   font-size: 11px;
 }
 
+.confidence-row {
+  width: fit-content;
+
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  margin-top: 14px;
+  padding: 6px 10px;
+
+  color: var(--text2);
+  background: var(--bg3);
+
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+
+  font-family: var(--mono);
+  font-size: 11px;
+}
+
+.confidence-row strong {
+  color: var(--green);
+}
+
 .code-snippet {
   margin: 10px 0 0;
   padding: 14px;

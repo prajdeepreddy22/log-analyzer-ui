@@ -120,7 +120,7 @@
       <article class="analysis-card full">
 
         <div class="a-label">
-          Severity score
+          Severity and confidence
         </div>
 
         <div class="severity-display">
@@ -156,6 +156,18 @@
             </div>
 
           </div>
+
+        </div>
+
+        <div class="confidence-row">
+
+          <span>
+            Confidence
+          </span>
+
+          <strong>
+            {{ confidencePercent() }}%
+          </strong>
 
         </div>
 
@@ -260,7 +272,7 @@
                 </strong>
 
                 <span>
-                  {{ item.summary }}
+                  {{ historySubtitle(item) }}
                 </span>
               </span>
 

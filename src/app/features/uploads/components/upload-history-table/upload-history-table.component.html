@@ -116,3 +116,61 @@
   </table>
 
 </div>
+
+@if (pendingDeleteUpload(); as uploadToDelete) {
+
+  <div
+    class="confirm-backdrop"
+    role="presentation"
+  >
+
+    <section
+      class="confirm-panel"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="delete-upload-title"
+      aria-describedby="delete-upload-description"
+    >
+
+      <div class="confirm-icon">
+        !
+      </div>
+
+      <div class="confirm-content">
+
+        <h2 id="delete-upload-title">
+          Delete upload?
+        </h2>
+
+        <p id="delete-upload-description">
+          This removes
+          <strong>{{ uploadToDelete.fileName }}</strong>
+          and its parsed log data.
+        </p>
+
+      </div>
+
+      <div class="confirm-actions">
+
+        <button
+          type="button"
+          class="confirm-secondary"
+          (click)="cancelDeleteUpload()"
+        >
+          Cancel
+        </button>
+
+        <button
+          type="button"
+          class="confirm-danger"
+          (click)="confirmDeleteUpload()"
+        >
+          Delete
+        </button>
+
+      </div>
+
+    </section>
+
+  </div>
+}

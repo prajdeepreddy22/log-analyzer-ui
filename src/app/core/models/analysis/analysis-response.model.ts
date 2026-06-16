@@ -18,6 +18,8 @@ export interface AnalysisResponseModel {
 
   severityScore?: number;
 
+  confidenceScore?: number;
+
   status?: AnalysisStatus;
 
   analysis_status?: AnalysisStatus;

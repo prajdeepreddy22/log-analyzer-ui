@@ -167,6 +167,21 @@
 
       </section>
 
+      @if (analysisStore.analysis()?.confidenceScore !== undefined) {
+
+        <section class="analysis-block">
+
+          <div class="block-label">
+            Confidence
+          </div>
+
+          <div class="confidence-pill">
+            {{ (analysisStore.analysis()?.confidenceScore || 0) * 100 | number:'1.0-0' }}%
+          </div>
+
+        </section>
+      }
+
       <section class="analysis-block">
 
         <div class="block-label">

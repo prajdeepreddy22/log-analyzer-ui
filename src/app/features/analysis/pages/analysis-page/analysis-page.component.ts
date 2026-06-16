@@ -94,6 +94,16 @@ export class AnalysisPageComponent
       )
     );
 
+  readonly confidenceScore =
+    computed(() =>
+      this.analysisStore.analysis()?.confidenceScore ?? 0
+    );
+
+  readonly confidencePercent =
+    computed(() =>
+      Math.round(this.confidenceScore() * 100)
+    );
+
   readonly hasAnalysis =
     computed(() =>
       this.analysisStore.isCompleted() &&
@@ -230,6 +240,28 @@ export class AnalysisPageComponent
   ): boolean {
 
     return this.severityScore() >= block;
+  }
+
+  historySubtitle(
+    item: {
+      summary?: string;
+      status?: string;
+      createdAt?: string;
+    }
+  ): string {
+
+    if (item.summary) {
+      return item.summary;
+    }
+
+    const status =
+      item.status || 'Analysis result';
+
+    if (!item.createdAt) {
+      return status;
+    }
+
+    return `${status} - ${new Date(item.createdAt).toLocaleString()}`;
   }
 
   private getSeverityLabel(
