@@ -8,6 +8,13 @@ import {
   ChatMessageModel
 } from '../models/chat/chat-message.model';
 
+function generateId(): string {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  return Math.random().toString(36).substring(2) + Date.now().toString(36);
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -54,7 +61,7 @@ export class ChatStoreService {
     const message:
       ChatMessageModel = {
 
-      id: crypto.randomUUID(),
+      id: generateId(),
 
       role: 'user',
 
@@ -90,8 +97,7 @@ export class ChatStoreService {
 
   addLoadingMessage(): string {
 
-    const id =
-      crypto.randomUUID();
+    const id = generateId();
 
     const loadingMessage:
       ChatMessageModel = {
