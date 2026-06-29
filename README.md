@@ -1,368 +1,243 @@
-﻿# LogAI - Incident Intelligence Frontend
+# LogAI - Incident Intelligence Frontend
 
 ![Angular](https://img.shields.io/badge/Angular-18-red)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.5-blue)
 ![RxJS](https://img.shields.io/badge/RxJS-7.8-purple)
-![SSE](https://img.shields.io/badge/SSE-Streaming-green)
 ![AWS](https://img.shields.io/badge/AWS-EC2-orange)
-![Docker](https://img.shields.io/badge/Backend-Docker-blue)
 
-> Production-grade Angular frontend for an AI-powered incident investigation platform that combines log uploads, searchable log exploration, AI root cause analysis, and real-time conversational troubleshooting.
+LogAI is an Angular application I built for investigating application logs with AI. It covers the complete frontend flow: authentication, file uploads, parsed log exploration, AI analysis, streaming chat, and usage tracking.
 
-- **Live Demo:** http://35.154.51.190
-- **Backend Repo:** [https://github.com/prajdeepreddy22/log-analyzer](https://github.com/prajdeepreddy22/log-analyzer)
+- **Live application:** http://35.154.51.190
+- **Backend repository:** [prajdeepreddy22/log-analyzer](https://github.com/prajdeepreddy22/log-analyzer)
 - **Backend Swagger UI:** http://35.154.51.190/api/swagger-ui/index.html
-- **Author:** Rajdeep Reddy - [GitHub](https://github.com/prajdeepreddy22)
 
----
+## What I Wanted From The Frontend
 
-## What Is LogAI Frontend?
+The backend produces useful analysis data, but I wanted the investigation workflow to feel like one connected product instead of a collection of API screens. The frontend guides a user from uploading a file to understanding an incident and asking follow-up questions.
 
-LogAI frontend is the Angular 18 client for a full-stack AI log analyzer. It gives developers and support engineers a clean interface to upload log files, inspect parsed events, trigger AI analysis, and continue investigation through a streaming AI chat assistant.
+This project helped me work through practical Angular concerns such as typed API contracts, authentication state, polling, SSE cleanup, error handling, responsive layouts, and production routing behind Nginx.
 
----
-
-## Highlights
-
-- Angular 18 standalone component architecture
-- TypeScript strict-mode application
-- JWT authentication and protected routing
-- Upload workflow for `.log` and `.txt` files
-- Searchable log viewer with filters and pagination
-- AI analysis page with root cause, severity, confidence score, and fix suggestions
-- Real-time chat powered by Server-Sent Events
-- Rate-limit dashboard with minute and daily usage timers
-- Responsive shell layout with sidebar navigation
-- Production build configured for `/api` reverse proxy routing
-
-Key capabilities:
-
-- Authenticated user flows for registration, login, profile, and logout
-- Upload history with file size, parsed count, warning count, and error count
-- Structured log browsing by level, service, timestamp, and keyword
-- AI-assisted incident investigation from uploaded log context
-- SSE streaming chat with safe stop/cleanup behavior
-- User-friendly API error handling and toast notifications
-
----
-
-## Tech Stack
-
-| Layer | Technology |
-| --- | --- |
-| Framework | Angular 18 |
-| Language | TypeScript 5.5 |
-| Styling | SCSS |
-| State | Angular Signals + RxJS |
-| Routing | Angular Router with guards |
-| HTTP | Angular HttpClient + interceptors |
-| Streaming | EventSource / Server-Sent Events |
-| Charts | ECharts / ngx-echarts |
-| Icons | lucide-angular |
-| Markdown | marked + DOMPurify |
-| Notifications | ngx-toastr |
-| Testing | Jasmine + Karma + ChromeHeadless |
-| Build | Angular CLI |
-| Deployment | Nginx on AWS EC2, production API base `/api` |
-
----
-
-## Architecture
-
-```text
-Browser
-  |
-  v
-Angular SPA
-  |
-  |-- Auth Guard + JWT Interceptor
-  |-- Upload / Logs / Analysis / Chat Stores
-  |-- EventSource SSE Client
-  |
-  v
-/api/* reverse proxy
-  |
-  v
-Spring Boot Backend
-  |
-  +-- MySQL
-  +-- OpenAI GPT-4o mini
-```
-
-The production frontend uses a relative API base URL (`/api`), allowing Nginx or CloudFront to route frontend pages and backend API requests from the same domain.
-
----
-
-## Features
+## Main Features
 
 ### Authentication
 
-- Register and login flows
-- JWT stored through a dedicated token utility
-- Auth interceptor attaches `Authorization: Bearer <token>` to API requests
-- Route guards protect dashboard, uploads, logs, analysis, chat, and rate-limit pages
-- Profile menu supports profile updates and logout
+- Registration and login with validation feedback
+- JWT-based session handling
+- Route guards for authenticated pages
+- Profile update and logout from the sidebar menu
+- Automatic handling for invalid or expired sessions
 
 ### Uploads
 
-- Drag-and-drop style upload workflow
-- Upload history table with status, size, parsed logs, warnings, and errors
-- Custom delete confirmation modal matching the app UI
-- Polling-based upload status refresh
+- Drag-and-drop file upload
+- Upload progress and processing status
+- History with file size, total logs, warnings, and errors
+- Custom confirmation dialog for deletion
+- Polling that stops when processing reaches a terminal state
 
-### Log Viewer
+### Log viewer
 
-- Parsed log table with level, timestamp, service, and message
-- Search and filtering by keyword, level, service, and date range
-- Stats cards for log totals and severity breakdown
-- Inline AI panel for analysis context
+- Paginated structured log table
+- Filters for level, service, keyword, and date range
+- Error and warning statistics
+- Upload-aware navigation between logs, analysis, and chat
 
-### AI Analysis
+### AI analysis
 
-- Trigger analysis per upload
-- Polling lifecycle for queued, processing, completed, failed, and not-started states
-- Displays summary, root cause, developer mistake, fix suggestion, code fix, severity, and confidence score
-- History view for previous analyses
+- Starts analysis for a selected upload
+- Polls queued and processing states
+- Displays summary, root cause, severity, confidence, developer mistake, and suggested fix
+- Preserves failed-state reasons instead of showing a generic empty page
 
-### AI Chat
+### Streaming chat
 
-- Streaming AI assistant with EventSource
-- Chunk-by-chunk response rendering
-- Stop streaming support
-- Referenced log cards and insight chips
-- Safe rendering for markdown content through sanitization
+- Uses browser `EventSource` for SSE responses
+- Renders response chunks as they arrive
+- Supports stopping an active stream
+- Shows referenced logs and extracted insight chips
+- Sanitizes AI-generated Markdown before rendering
 
-### Rate Limits
+### Usage limits
 
-- Minute and daily AI budget display
-- Human-readable countdown timers
-- Blocked state handling
-- Refreshes usage after analysis and chat activity
+- Displays minute and daily AI usage
+- Shows live reset countdowns
+- Refreshes counters after analysis and chat requests
+- Handles blocked and rate-limited states
 
----
+## Tech Stack
 
-## Project Metrics
-
-- Angular 18 standalone UI
-- 100+ frontend unit tests
-- Strict TypeScript application and spec type checks
-- JWT-secured API integration
-- Real-time SSE chat integration
-- Production build output for static hosting
-- Environment-based API configuration
-- Responsive dashboard-style user experience
-
----
-
-## Request Flow
-
-1. User logs in and receives a JWT
-2. Frontend stores the token and attaches it to protected API calls
-3. User uploads a `.log` or `.txt` file
-4. Backend parses logs and returns upload status
-5. User opens logs, searches, filters, and inspects entries
-6. User triggers AI analysis for an upload
-7. Frontend polls analysis status until completion
-8. User asks follow-up questions in AI chat
-9. EventSource streams the assistant response in real time
-10. Rate-limit counters update after AI usage
-
----
-
-## Main Routes
-
-| Route | Description |
+| Area | Technology |
 | --- | --- |
-| `/login` | User login |
-| `/register` | User registration |
-| `/dashboard` | Main dashboard |
-| `/uploads` | Upload and upload history |
-| `/logs` | Logs landing page |
+| Framework | Angular 18, standalone components |
+| Language | TypeScript 5.5, strict mode |
+| Styling | SCSS |
+| State | Angular Signals and RxJS |
+| HTTP | Angular HttpClient and interceptors |
+| Routing | Angular Router and auth guard |
+| Streaming | EventSource / Server-Sent Events |
+| Charts | ECharts and ngx-echarts |
+| Icons | Lucide Angular |
+| Markdown | marked and DOMPurify |
+| Notifications | ngx-toastr |
+| Testing | Jasmine, Karma, ChromeHeadless |
+| Deployment | Nginx on AWS EC2 |
+
+## Application Flow
+
+```text
+Login
+  |
+  v
+Dashboard --> Upload file --> Processing status
+                              |
+                              v
+                         Parsed log viewer
+                              |
+                    +---------+---------+
+                    |                   |
+                    v                   v
+               AI analysis        Streaming chat
+                    |                   |
+                    +---------+---------+
+                              |
+                              v
+                       Rate-limit refresh
+```
+
+The production build uses `/api` as a relative backend URL. Nginx serves the Angular files and proxies `/api/*` to Spring Boot, so the browser sees one origin.
+
+## Frontend Structure
+
+```text
+src/app/
+|-- core/
+|   |-- api/           Typed backend API clients
+|   |-- guards/        Authentication guard
+|   |-- interceptors/  JWT and API error handling
+|   |-- models/        Request and response types
+|   |-- services/      SSE and session services
+|   |-- stores/        Signal/RxJS feature state
+|   `-- utils/         Token, error, file-size, and stream helpers
+|-- features/
+|   |-- auth/
+|   |-- dashboard/
+|   |-- uploads/
+|   |-- logs/
+|   |-- analysis/
+|   |-- chat/
+|   `-- rate-limit/
+`-- shared/
+    |-- components/    Sidebar, topbar, and reusable controls
+    |-- layouts/       Auth layout and application shell
+    `-- pipes/         Sanitized Markdown rendering
+```
+
+## Routes
+
+| Route | Purpose |
+| --- | --- |
+| `/login` | Login |
+| `/register` | Create an account |
+| `/dashboard` | Overview |
+| `/uploads` | Upload and history |
 | `/logs/:uploadId` | Parsed log viewer |
-| `/analysis` | Analysis landing/redirect |
-| `/analysis/:uploadId` | AI analysis result page |
-| `/chat` | AI chat assistant |
-| `/rate-limit` | AI usage and quota dashboard |
+| `/analysis/:uploadId` | AI analysis result |
+| `/chat` | Log-aware AI chat |
+| `/rate-limit` | AI usage and reset timers |
 
----
+## Implementation Notes
 
-## API Integration
+### Small feature stores instead of NgRx
 
-Production API base URL:
+I used focused services built with Angular Signals and RxJS. The application needed shared async state, but not enough global complexity to justify adding NgRx.
 
-```ts
-apiBaseUrl: '/api'
-```
+### Polling has explicit terminal states
 
-Development API base URL:
+Upload and analysis polling stop on completed, failed, not-started, or unavailable states. This prevents repeated requests and endless loading states.
 
-```ts
-apiBaseUrl: 'http://127.0.0.1:8080/api'
-```
+### SSE is isolated in one service
 
-Important backend contracts:
+Connection setup, message parsing, error events, completion, and cleanup live in the streaming service. Components receive state updates without managing the raw `EventSource` lifecycle.
 
-| Frontend Use Case | Backend Endpoint |
-| --- | --- |
-| Register | `POST /api/auth/register` |
-| Login | `POST /api/auth/login` |
-| Current profile | `GET /api/auth/me` |
-| Update profile | `PATCH /api/auth/profile` |
-| Upload file | `POST /api/upload` |
-| Upload history | `GET /api/uploads` |
-| Logs | `GET /api/logs/{uploadId}` |
-| Log search | `POST /api/logs/search/{uploadId}` |
-| Analysis trigger | `POST /api/analysis/{uploadId}` |
-| Analysis status | `GET /api/analysis/{uploadId}/status` |
-| Analysis result | `GET /api/analysis/{uploadId}` |
-| Chat | `POST /api/chat` |
-| Streaming chat | `GET /api/chat/stream?message=...&uploadId=...&token=...` |
-| Rate limits | `GET /api/rate-limit/status` |
+### API errors are normalized once
 
----
+Backend errors can expose `details`, `errorMessage`, `error_message`, or `message`. A shared utility selects the best safe message so each page does not implement its own fallback chain.
+
+### Production uses a relative API URL
+
+Development calls `http://127.0.0.1:8080/api`. Production calls `/api`, which works behind Nginx today and can also work behind CloudFront without rebuilding the Angular bundle.
 
 ## Running Locally
 
-### Prerequisites
+### Requirements
 
 - Node.js 20+
 - npm
-- Angular CLI or `npx ng`
-- Running LogAI backend on `http://127.0.0.1:8080/api`
-
-Install dependencies:
+- LogAI backend running on `http://127.0.0.1:8080/api`
 
 ```bash
 npm ci
-```
-
-Start development server:
-
-```bash
 npm start
 ```
 
-Open:
+Open `http://localhost:4200`.
 
-```text
-http://localhost:4200
-```
-
----
-
-## Verification
-
-Run strict application type check:
+## Build And Test
 
 ```bash
 npm run typecheck
-```
-
-Run strict spec type check:
-
-```bash
 npm run typecheck:spec
-```
-
-Run CI unit tests:
-
-```bash
 npm run test:ci
-```
-
-Build production bundle:
-
-```bash
 npm run build:prod
 ```
 
-Expected production output:
+Production files are generated in:
 
 ```text
 dist/log-analyzer-ui/browser
 ```
 
----
+Production source maps are disabled, filenames are hashed, and Angular CLI enforces bundle and component-style budgets.
+
+## Environment Configuration
+
+Development:
+
+```ts
+apiBaseUrl: 'http://127.0.0.1:8080/api'
+```
+
+Production:
+
+```ts
+apiBaseUrl: '/api'
+```
+
+No backend credentials or OpenAI keys belong in the Angular application. The browser only stores the authenticated user's JWT.
 
 ## Deployment
 
-Current portfolio deployment:
+The live portfolio version is built with `npm run build:prod` and served by Nginx on the same EC2 instance as the backend.
 
 ```text
-AWS EC2 t3.micro (Amazon Linux 2023, ap-south-1)
-|-- Nginx serves Angular static files
-|-- Nginx proxies /api/* to Spring Boot backend
-|-- Spring Boot backend runs in Docker
-`-- MySQL runs in Docker
+Browser
+  |
+  v
+Nginx on EC2
+  |-- /*      Angular static files
+  `-- /api/*  Spring Boot container
 ```
 
-Production deployment requirements:
+CloudFront and HTTPS are the next infrastructure step. Because production already uses `/api`, that change does not require a frontend code change. It requires the correct CloudFront behavior, query-string forwarding for SSE, and a matching backend CORS origin.
 
-- Build with `npm run build:prod`
-- Serve files from `dist/log-analyzer-ui/browser`
-- Configure SPA fallback to `index.html`
-- Proxy `/api/*` to the backend without adding another `/api` prefix
-- Forward `Authorization` header for authenticated API calls
-- Forward query parameters for SSE chat
-- Keep backend CORS aligned with the deployed frontend origin
+## What I Would Improve Next
 
-For S3 + CloudFront deployment, ensure:
+- The live site currently uses HTTP
+- The frontend is a client-rendered SPA without server-side rendering
+- Automated browser end-to-end tests are not included yet
+- Chat history is kept in the active frontend session rather than a dedicated conversation service
 
-- `/api/*` cache behavior points to backend origin
-- `/api/*` caching is disabled
-- Query strings are forwarded
-- `Authorization` and CORS headers are forwarded
-- Origin response timeout supports long SSE responses
-- Static frontend routes fall back to `index.html`
-
-See [DEPLOYMENT.md](DEPLOYMENT.md) for the full deployment checklist.
-
----
-
-## Project Structure
-
-```text
-src/app/
-|-- core/
-|   |-- api/           # Backend API clients
-|   |-- guards/        # Auth route guards
-|   |-- interceptors/  # JWT and API error interceptors
-|   |-- models/        # Typed request/response models
-|   |-- services/      # Streaming and session services
-|   |-- stores/        # Signal/RxJS state services
-|   `-- utils/         # Token, file size, error, streaming utilities
-|-- features/
-|   |-- auth/          # Login and registration
-|   |-- dashboard/     # Dashboard home
-|   |-- uploads/       # Upload flow and history
-|   |-- logs/          # Log viewer and filters
-|   |-- analysis/      # AI analysis pages
-|   |-- chat/          # AI chat assistant
-|   `-- rate-limit/    # Usage dashboard
-|-- shared/
-|   |-- components/    # Sidebar, topbar, reusable UI pieces
-|   |-- layouts/       # Auth layout and app shell
-|   `-- pipes/         # Markdown rendering pipe
-+-- environments/      # Development and production API config
-```
-
----
-
-## Key Design Decisions
-
-**Relative Production API URL:** Production uses `/api` so the same frontend build works behind Nginx or CloudFront reverse proxy routing.
-
-**EventSource For Chat:** The browser `EventSource` API is used for streaming AI responses. Since it cannot send custom headers, the SSE token is passed as a URL query parameter for that endpoint only.
-
-**Signals + RxJS Stores:** Feature state is organized in small services using Angular Signals and RxJS so pages stay reactive without adding NgRx complexity.
-
-**Strict Typed Models:** API contracts are represented with TypeScript models for auth, uploads, logs, analysis, chat, and rate limits.
-
-**Sanitized Markdown Rendering:** AI responses can contain markdown. The frontend renders markdown through `marked` and sanitizes it with DOMPurify.
-
-**Static Hosting Ready:** The production bundle is static and can be served from Nginx, S3 + CloudFront, or another static host with SPA fallback.
-
----
+For the next iteration, I would add CloudFront/HTTPS first, followed by a small Playwright smoke-test suite covering login, upload, analysis, and chat.
 
 ## Screenshots
 
@@ -386,29 +261,8 @@ src/app/
 
 ![Rate Limits](docs/screenshots/ratelimits.png)
 
----
+## What I Learned
 
-## Security Notes
+I built this frontend to demonstrate Angular development beyond static forms and CRUD screens. The main challenges were coordinating asynchronous backend work, keeping API contracts typed, handling streaming responses safely, and turning a technical log-analysis workflow into a usable interface.
 
-- No secrets are stored in the Angular source code
-- Production build uses relative `/api` routing instead of hardcoded backend secrets
-- JWT is stored and attached through dedicated frontend utilities/interceptors
-- Protected routes require authentication
-- API errors are normalized into user-friendly messages
-- AI-generated markdown is sanitized before rendering
-
----
-
-## Future Enhancements
-
-- Dark mode
-- More dashboard charts
-- Export analysis reports as PDF
-- Saved chat sessions
-- WebSocket fallback for streaming
-- S3 + CloudFront static hosting variant
-- End-to-end tests with Playwright or Cypress
-
----
-
-Built by Rajdeep Reddy as a portfolio project demonstrating Angular 18, TypeScript strict mode, JWT authentication, real-time SSE streaming, AI-powered workflows, and AWS deployment.
+The Spring Boot backend is available at [prajdeepreddy22/log-analyzer](https://github.com/prajdeepreddy22/log-analyzer).
