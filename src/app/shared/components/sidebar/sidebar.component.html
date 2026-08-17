@@ -112,6 +112,28 @@
 
   </nav>
 
+
+  <nav
+    class="nav-group"
+    aria-label="Settings navigation"
+  >
+
+    <div class="nav-label">
+      Settings
+    </div>
+
+    <a
+      routerLink="/settings/tokens"
+      routerLinkActive="active"
+      [routerLinkActiveOptions]="{ exact: true }"
+      class="nav-item"
+      (click)="layoutStore.closeMobileDrawer()"
+    >
+      <span class="nav-dot blue"></span>
+      API Tokens
+    </a>
+
+  </nav>
   <div class="sidebar-footer">
 
     <button

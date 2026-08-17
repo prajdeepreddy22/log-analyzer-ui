@@ -161,6 +161,20 @@ export const routes: Routes = [
       },
 
       // =====================
+      // SETTINGS
+      // =====================
+
+      {
+        path: 'settings/tokens',
+
+        loadComponent: () =>
+          import(
+            './features/settings/pages/api-tokens-page/api-tokens-page.component'
+          ).then(
+            m => m.ApiTokensPageComponent
+          )
+      },
+      // =====================
       // DEFAULT APP ROUTE
       // =====================
 

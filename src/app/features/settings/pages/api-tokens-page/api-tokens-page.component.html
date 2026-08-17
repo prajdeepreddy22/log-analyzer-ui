@@ -1,0 +1,242 @@
+<div class="settings-page">
+
+  <header class="settings-header">
+
+    <div>
+
+      <p class="eyebrow">
+        LIVE INGESTION
+      </p>
+
+      <h1>
+        API tokens
+      </h1>
+
+    </div>
+
+    <button
+      type="button"
+      class="refresh-button"
+      (click)="tokenStore.loadTokens()"
+      [disabled]="tokenStore.loading()"
+    >
+      Refresh
+    </button>
+
+  </header>
+
+  <section class="create-panel">
+
+    <div>
+
+      <h2>
+        Create ingestion token
+      </h2>
+
+      <p>
+        Use this token with the local watcher or any trusted log forwarder.
+      </p>
+
+    </div>
+
+    <form
+      class="token-form"
+      (ngSubmit)="createToken()"
+    >
+
+      <label>
+        <span>Token name</span>
+
+        <input
+          type="text"
+          maxlength="255"
+          [ngModel]="tokenName()"
+          name="tokenName"
+          placeholder="local laptop watcher"
+          (ngModelChange)="updateTokenName($event)"
+        />
+      </label>
+
+      <button
+        type="submit"
+        class="primary-button"
+        [disabled]="tokenStore.creating()"
+      >
+        @if (tokenStore.creating()) {
+          Creating...
+        } @else {
+          Generate token
+        }
+      </button>
+
+    </form>
+
+  </section>
+
+  @if (tokenStore.createdToken()?.token) {
+
+    <section class="created-token-panel">
+
+      <div>
+
+        <div class="created-title">
+          Copy this token now
+        </div>
+
+        <p>
+          It will not be shown again after you leave this panel.
+        </p>
+
+      </div>
+
+      <code>
+        {{ tokenStore.createdToken()?.token }}
+      </code>
+
+      <div class="created-actions">
+
+        <button
+          type="button"
+          class="secondary-button"
+          (click)="copyToken()"
+        >
+          Copy
+        </button>
+
+        <button
+          type="button"
+          class="ghost-button"
+          (click)="dismissCreatedToken()"
+        >
+          Done
+        </button>
+
+      </div>
+
+      @if (copyState()) {
+        <div class="copy-state">
+          {{ copyState() }}
+        </div>
+      }
+
+    </section>
+  }
+
+  @if (tokenStore.error()) {
+    <div class="alert error">
+      {{ tokenStore.error() }}
+    </div>
+  }
+
+  @if (tokenStore.success() && !tokenStore.createdToken()?.token) {
+    <div class="alert success">
+      {{ tokenStore.success() }}
+    </div>
+  }
+
+  <section class="tokens-panel">
+
+    <div class="panel-heading">
+
+      <div>
+
+        <h2>
+          Existing tokens
+        </h2>
+
+        <p>
+          Active and revoked ingestion credentials for this account.
+        </p>
+
+      </div>
+
+      <span class="count-pill">
+        {{ tokenStore.activeTokens().length }} active
+      </span>
+
+    </div>
+
+    @if (tokenStore.loading()) {
+
+      <div class="empty-state">
+        Loading tokens...
+      </div>
+
+    } @else if (!tokenStore.hasTokens()) {
+
+      <div class="empty-state">
+        No ingestion tokens yet.
+      </div>
+
+    } @else {
+
+      <div class="token-table">
+
+        <div class="token-row header-row">
+          <span>Name</span>
+          <span>Scope</span>
+          <span>Created</span>
+          <span>Last used</span>
+          <span>Status</span>
+          <span></span>
+        </div>
+
+        @for (token of tokenStore.tokens(); track token.id) {
+
+          <div
+            class="token-row"
+            [class.revoked]="token.revoked"
+          >
+
+            <span class="token-name">
+              {{ token.name || 'Unnamed token' }}
+            </span>
+
+            <span class="mono">
+              {{ token.scope }}
+            </span>
+
+            <span>
+              {{ formatDate(token.createdAt) }}
+            </span>
+
+            <span>
+              {{ formatDate(token.lastUsedAt) }}
+            </span>
+
+            <span>
+              <span
+                class="status-pill"
+                [class.revoked]="token.revoked"
+              >
+                {{ token.revoked ? 'REVOKED' : 'ACTIVE' }}
+              </span>
+            </span>
+
+            <span class="row-actions">
+              <button
+                type="button"
+                class="danger-button"
+                (click)="revokeToken(token)"
+                [disabled]="
+                  token.revoked ||
+                  tokenStore.revokingId() === token.id
+                "
+              >
+                @if (tokenStore.revokingId() === token.id) {
+                  Revoking...
+                } @else {
+                  Revoke
+                }
+              </button>
+            </span>
+
+          </div>
+        }
+
+      </div>
+    }
+
+  </section>
+
+</div>
