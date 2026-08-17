@@ -4,6 +4,8 @@ import {
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { LayoutStoreService } from '../../../core/stores/layout-store.service';
+import { RealtimeEventStoreService } from '../../../core/stores/realtime-event-store.service';
+import { RealtimeUiSyncService } from '../../../core/services/realtime-ui-sync.service';
 
 @Component({
   selector: 'app-topbar',
@@ -18,4 +20,10 @@ export class TopbarComponent {
 
   readonly layoutStore =
     inject(LayoutStoreService);
+
+  readonly realtimeEvents =
+    inject(RealtimeEventStoreService);
+
+  readonly realtimeUiSync =
+    inject(RealtimeUiSyncService);
 }

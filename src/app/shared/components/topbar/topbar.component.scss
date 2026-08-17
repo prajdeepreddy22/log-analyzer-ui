@@ -56,6 +56,77 @@
   border-radius: 999px;
 }
 
+.realtime-pill,
+.live-log-badge {
+  height: 26px;
+
+  display: inline-flex;
+  align-items: center;
+
+  gap: 6px;
+
+  border: 1px solid var(--border2);
+  border-radius: 999px;
+
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.realtime-pill {
+  padding: 0 9px;
+
+  color: var(--text3);
+
+  background: var(--bg1);
+}
+
+.realtime-pill span {
+  width: 6px;
+  height: 6px;
+
+  border-radius: 999px;
+
+  background: var(--text3);
+}
+
+.realtime-pill.live {
+  color: var(--green);
+
+  border-color: var(--green-border);
+  background: var(--green-bg);
+}
+
+.realtime-pill.live span {
+  background: var(--green);
+}
+
+.realtime-pill.loading span {
+  background: var(--yellow);
+}
+
+.realtime-pill.offline {
+  color: var(--red);
+
+  border-color: var(--red-border);
+  background: var(--red-bg);
+}
+
+.realtime-pill.offline span {
+  background: var(--red);
+}
+
+.live-log-badge {
+  padding: 0 10px;
+
+  color: var(--purple);
+
+  background: rgba(124, 92, 255, 0.1);
+  border-color: rgba(124, 92, 255, 0.35);
+
+  cursor: pointer;
+}
+
 .btn {
   display: inline-flex;
   align-items: center;
@@ -122,11 +193,22 @@
   .btn {
     padding-inline: 9px;
   }
+
+  .realtime-pill {
+    padding-inline: 8px;
+  }
+
+  .live-log-badge {
+    max-width: 82px;
+    overflow: hidden;
+    white-space: nowrap;
+  }
 }
 
 @media (max-width: 420px) {
 
-  .topbar-title {
+  .topbar-title,
+  .realtime-pill {
     display: none;
   }
 }

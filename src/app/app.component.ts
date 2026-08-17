@@ -12,6 +12,7 @@ import { AuthService } from './core/services/auth.service';
 import { RateLimitStoreService } from './core/stores/rate-limit-store.service';
 import { SessionEventsService } from './core/services/session-events.service';
 import { RealtimeEventStoreService } from './core/stores/realtime-event-store.service';
+import { RealtimeUiSyncService } from './core/services/realtime-ui-sync.service';
 
 @Component({
   selector: 'app-root',
@@ -35,6 +36,9 @@ export class AppComponent implements OnInit {
 
   private readonly realtimeEvents =
     inject(RealtimeEventStoreService);
+
+  private readonly realtimeUiSync =
+    inject(RealtimeUiSyncService);
 
   private readonly destroyRef =
     inject(DestroyRef);
@@ -67,6 +71,7 @@ export class AppComponent implements OnInit {
 
       this.rateLimitStore.refreshNow();
       this.realtimeEvents.connect();
+      this.realtimeUiSync.start();
     }
   }
 }

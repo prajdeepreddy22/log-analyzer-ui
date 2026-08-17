@@ -25,6 +25,7 @@ import { UploadStoreService } from '../stores/upload-store.service';
 import { LogStoreService } from '../stores/log-store.service';
 import { ChatStreamingService } from './chat-streaming.service';
 import { RealtimeEventStoreService } from '../stores/realtime-event-store.service';
+import { RealtimeUiSyncService } from './realtime-ui-sync.service';
 import { environment } from '../../../environments/environment';
 
 @Injectable({
@@ -42,6 +43,7 @@ export class AuthService {
   private readonly logStore = inject(LogStoreService);
   private readonly chatStreaming = inject(ChatStreamingService);
   private readonly realtimeEvents = inject(RealtimeEventStoreService);
+  private readonly realtimeUiSync = inject(RealtimeUiSyncService);
 
   // =====================================================
   // AUTH STATE (SIGNAL BASED)
@@ -118,6 +120,7 @@ export class AuthService {
 
     this.rateLimitStore.refreshNow();
     this.realtimeEvents.connect();
+    this.realtimeUiSync.start();
 
     this.loadCurrentUser()
       .pipe(
@@ -185,6 +188,7 @@ export class AuthService {
     this.logStore.reset();
     this.chatStreaming.closeAll();
     this.realtimeEvents.reset();
+    this.realtimeUiSync.reset();
   }
 
   // =====================================================

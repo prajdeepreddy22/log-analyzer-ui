@@ -21,6 +21,27 @@
     GenAI Log Analyzer
   </div>
 
+  <div
+    class="realtime-pill"
+    [class.live]="realtimeEvents.connected()"
+    [class.loading]="realtimeEvents.connecting()"
+    [class.offline]="realtimeEvents.error()"
+    [title]="realtimeEvents.error() || realtimeUiSync.liveMessage() || 'Realtime updates'"
+  >
+    <span aria-hidden="true"></span>
+    {{ realtimeEvents.connectionLabel() }}
+  </div>
+
+  @if (realtimeUiSync.hasNewLiveLogs()) {
+    <button
+      class="live-log-badge"
+      type="button"
+      title="Clear live log notification"
+      (click)="realtimeUiSync.clearLiveLogBadge()"
+    >
+      +{{ realtimeUiSync.newLiveLogCount() }} logs
+    </button>
+  }
   <button
     class="btn"
     type="button"
