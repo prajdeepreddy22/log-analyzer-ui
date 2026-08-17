@@ -174,6 +174,16 @@ export const routes: Routes = [
             m => m.ApiTokensPageComponent
           )
       },
+      {
+        path: 'settings/sources',
+
+        loadComponent: () =>
+          import(
+            './features/settings/pages/log-sources-page/log-sources-page.component'
+          ).then(
+            m => m.LogSourcesPageComponent
+          )
+      },
       // =====================
       // DEFAULT APP ROUTE
       // =====================

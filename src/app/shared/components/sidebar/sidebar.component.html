@@ -133,6 +133,17 @@
       API Tokens
     </a>
 
+
+    <a
+      routerLink="/settings/sources"
+      routerLinkActive="active"
+      [routerLinkActiveOptions]="{ exact: true }"
+      class="nav-item"
+      (click)="layoutStore.closeMobileDrawer()"
+    >
+      <span class="nav-dot green"></span>
+      Log Sources
+    </a>
   </nav>
   <div class="sidebar-footer">
 

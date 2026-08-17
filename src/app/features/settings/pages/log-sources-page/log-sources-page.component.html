@@ -1,0 +1,209 @@
+<div class="sources-page">
+
+  <header class="sources-header">
+
+    <div>
+
+      <p class="eyebrow">
+        LIVE INGESTION
+      </p>
+
+      <h1>
+        Log sources
+      </h1>
+
+    </div>
+
+    <button
+      type="button"
+      class="refresh-button"
+      (click)="sourceStore.loadSources()"
+      [disabled]="sourceStore.loading()"
+    >
+      Refresh
+    </button>
+
+  </header>
+
+  <section class="create-panel">
+
+    <div>
+
+      <h2>
+        Register source
+      </h2>
+
+      <p>
+        Create a source before sending live logs from a watcher or integration.
+      </p>
+
+    </div>
+
+    <form
+      class="source-form"
+      (ngSubmit)="createSource()"
+    >
+
+      <label>
+        <span>Source name</span>
+
+        <input
+          type="text"
+          maxlength="255"
+          [ngModel]="sourceName()"
+          name="sourceName"
+          placeholder="payment-service watcher"
+          (ngModelChange)="updateSourceName($event)"
+        />
+      </label>
+
+      <label class="type-field">
+        <span>Type</span>
+
+        <select
+          [ngModel]="sourceType()"
+          name="sourceType"
+          (ngModelChange)="updateSourceType($event)"
+        >
+          @for (type of sourceTypes; track type) {
+            <option [value]="type">
+              {{ typeLabel(type) }}
+            </option>
+          }
+        </select>
+      </label>
+
+      <button
+        type="submit"
+        class="primary-button"
+        [disabled]="sourceStore.creating() || !sourceName().trim()"
+      >
+        @if (sourceStore.creating()) {
+          Creating...
+        } @else {
+          Create source
+        }
+      </button>
+
+    </form>
+
+  </section>
+
+  @if (sourceStore.error()) {
+    <div class="alert error">
+      {{ sourceStore.error() }}
+    </div>
+  }
+
+  @if (sourceStore.success()) {
+    <div class="alert success">
+      {{ sourceStore.success() }}
+    </div>
+  }
+
+  <section class="sources-panel">
+
+    <div class="panel-heading">
+
+      <div>
+
+        <h2>
+          Registered sources
+        </h2>
+
+        <p>
+          Source IDs are used by ingestion clients when posting live batches.
+        </p>
+
+      </div>
+
+      <span class="count-pill">
+        {{ sourceStore.activeSources().length }} active
+      </span>
+
+    </div>
+
+    @if (sourceStore.loading()) {
+
+      <div class="empty-state">
+        Loading sources...
+      </div>
+
+    } @else if (!sourceStore.hasSources()) {
+
+      <div class="empty-state">
+        No live ingestion sources yet.
+      </div>
+
+    } @else {
+
+      <div class="source-table">
+
+        <div class="source-row header-row">
+          <span>Source</span>
+          <span>ID</span>
+          <span>Type</span>
+          <span>Last ingested</span>
+          <span>Status</span>
+          <span></span>
+        </div>
+
+        @for (source of sourceStore.sources(); track source.id) {
+
+          <div
+            class="source-row"
+            [class.inactive]="source.status === 'INACTIVE'"
+          >
+
+            <span class="source-name">
+              {{ source.sourceName }}
+            </span>
+
+            <span class="mono">
+              #{{ source.id }}
+            </span>
+
+            <span class="mono">
+              {{ source.sourceType }}
+            </span>
+
+            <span>
+              {{ formatDate(source.lastIngestedAt) }}
+            </span>
+
+            <span>
+              <span
+                class="status-pill"
+                [class.inactive]="source.status === 'INACTIVE'"
+              >
+                {{ source.status }}
+              </span>
+            </span>
+
+            <span class="row-actions">
+              <button
+                type="button"
+                class="toggle-button"
+                [class.activate]="source.status === 'INACTIVE'"
+                (click)="toggleStatus(source)"
+                [disabled]="sourceStore.updatingId() === source.id"
+              >
+                @if (sourceStore.updatingId() === source.id) {
+                  Updating...
+                } @else if (source.status === 'ACTIVE') {
+                  Deactivate
+                } @else {
+                  Activate
+                }
+              </button>
+            </span>
+
+          </div>
+        }
+
+      </div>
+    }
+
+  </section>
+
+</div>
