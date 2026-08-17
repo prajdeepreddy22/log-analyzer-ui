@@ -14,6 +14,7 @@ import { RealtimeEventStoreService } from '../stores/realtime-event-store.servic
 import { UploadStoreService } from '../stores/upload-store.service';
 import { AnalysisStoreService } from '../stores/analysis-store.service';
 import { RateLimitStoreService } from '../stores/rate-limit-store.service';
+import { IncidentStoreService } from '../stores/incident-store.service';
 import { LogSourceStoreService } from '../stores/log-source-store.service';
 import { UploadStatus } from '../models/upload/upload-status.enum';
 import { UploadResponseModel } from '../models/upload/upload-response.model';
@@ -38,6 +39,7 @@ describe('RealtimeUiSyncService', () => {
   };
   let analysisStore: jasmine.SpyObj<AnalysisStoreService>;
   let rateLimitStore: jasmine.SpyObj<RateLimitStoreService>;
+  let incidentStore: jasmine.SpyObj<IncidentStoreService>;
   let logSourceStore: jasmine.SpyObj<LogSourceStoreService> & {
     hasSources: ReturnType<typeof computed<boolean>>;
   };
@@ -78,6 +80,11 @@ describe('RealtimeUiSyncService', () => {
       ['refreshNow']
     );
 
+    incidentStore = jasmine.createSpyObj<IncidentStoreService>(
+      'IncidentStoreService',
+      ['refreshCurrentView']
+    );
+
     logSourceStore = jasmine.createSpyObj<LogSourceStoreService>(
       'LogSourceStoreService',
       ['loadSources'],
@@ -108,6 +115,10 @@ describe('RealtimeUiSyncService', () => {
         {
           provide: RateLimitStoreService,
           useValue: rateLimitStore
+        },
+        {
+          provide: IncidentStoreService,
+          useValue: incidentStore
         },
         {
           provide: LogSourceStoreService,

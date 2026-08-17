@@ -1,0 +1,340 @@
+﻿<div class="incidents-page">
+
+  <header class="incidents-header">
+
+    <div>
+
+      <p class="eyebrow">
+        INCIDENTS
+      </p>
+
+      <h1>
+        Incident lifecycle
+      </h1>
+
+      <p>
+        Track grouped root causes, ownership-safe history, and investigation status.
+      </p>
+
+    </div>
+
+    <button
+      type="button"
+      class="refresh-button"
+      (click)="incidentStore.refreshCurrentView()"
+      [disabled]="incidentStore.loading()"
+    >
+      Refresh
+    </button>
+
+  </header>
+
+  @if (incidentStore.error()) {
+    <div class="alert error">
+      {{ incidentStore.error() }}
+    </div>
+  }
+
+  @if (incidentStore.success()) {
+    <div class="alert success">
+      {{ incidentStore.success() }}
+    </div>
+  }
+
+  <section class="toolbar-panel">
+
+    <label>
+      <span>Status</span>
+
+      <select
+        [ngModel]="incidentStore.statusFilter()"
+        (ngModelChange)="updateFilter($event)"
+      >
+        @for (status of statuses; track status) {
+          <option [value]="status">
+            {{ statusLabel(status) }}
+          </option>
+        }
+      </select>
+    </label>
+
+    <label>
+      <span>Page size</span>
+
+      <select
+        [ngModel]="incidentStore.size()"
+        (ngModelChange)="incidentStore.setSize(+$event)"
+      >
+        <option [value]="10">10</option>
+        <option [value]="20">20</option>
+        <option [value]="50">50</option>
+      </select>
+    </label>
+
+    <span class="count-pill">
+      {{ incidentStore.totalElements() }} total
+    </span>
+
+  </section>
+
+  <main class="incident-layout">
+
+    <section class="incident-list-panel">
+
+      <div class="panel-heading">
+
+        <div>
+          <h2>Grouped incidents</h2>
+          <p>Sorted by severity, frequency, and last activity.</p>
+        </div>
+
+        <span class="count-pill muted">
+          Page {{ incidentStore.page() + 1 }} / {{ incidentStore.totalPages() || 1 }}
+        </span>
+
+      </div>
+
+      @if (incidentStore.loading()) {
+
+        <div class="empty-state">
+          Loading incidents...
+        </div>
+
+      } @else if (!incidentStore.hasIncidents()) {
+
+        <div class="empty-state">
+          No incidents found for this filter.
+        </div>
+
+      } @else {
+
+        <div class="incident-table">
+
+          <div class="incident-row header-row">
+            <span>Incident</span>
+            <span>Status</span>
+            <span>Severity</span>
+            <span>Confidence</span>
+            <span>Occurrences</span>
+            <span>Last seen</span>
+          </div>
+
+          @for (incident of incidentStore.incidents(); track trackByIncident($index, incident)) {
+
+            <button
+              type="button"
+              class="incident-row incident-button"
+              [class.selected]="incidentStore.selectedIncident()?.incidentId === incident.incidentId"
+              (click)="selectIncident(incident)"
+            >
+              <span>
+                <strong>{{ incident.title }}</strong>
+                <small>{{ incident.rootCause }}</small>
+              </span>
+
+              <span>
+                <span
+                  class="status-pill"
+                  [class.closed]="incident.status === 'CLOSED'"
+                  [class.active]="incident.status !== 'CLOSED'"
+                >
+                  {{ incident.status }}
+                </span>
+              </span>
+
+              <span>
+                <span
+                  class="severity-pill"
+                  [class.high]="severityClass(incident.severityScore) === 'high'"
+                  [class.medium]="severityClass(incident.severityScore) === 'medium'"
+                  [class.low]="severityClass(incident.severityScore) === 'low'"
+                >
+                  {{ incident.severityScore }}/5
+                </span>
+              </span>
+
+              <span>{{ confidencePercent(incident.confidenceScore) }}</span>
+              <span>{{ incident.occurrenceCount }}</span>
+              <span>{{ formatDate(incident.lastSeen) }}</span>
+            </button>
+          }
+
+        </div>
+
+        <div class="pagination-row">
+          <button
+            type="button"
+            class="secondary-button"
+            (click)="previousPage()"
+            [disabled]="incidentStore.page() === 0"
+          >
+            Previous
+          </button>
+
+          <button
+            type="button"
+            class="secondary-button"
+            (click)="nextPage()"
+            [disabled]="incidentStore.page() >= incidentStore.totalPages() - 1"
+          >
+            Next
+          </button>
+        </div>
+      }
+
+    </section>
+
+    <aside class="incident-detail-panel">
+
+      @if (!incidentStore.selectedIncident()) {
+
+        <div class="empty-state detail-empty">
+          Select an incident to review lifecycle details.
+        </div>
+
+      } @else {
+
+        @let incident = incidentStore.selectedIncident()!;
+
+        <div class="detail-heading">
+          <div>
+            <p class="eyebrow">SELECTED INCIDENT</p>
+            <h2>{{ incident.title }}</h2>
+          </div>
+
+          <span
+            class="status-pill"
+            [class.closed]="incident.status === 'CLOSED'"
+            [class.active]="incident.status !== 'CLOSED'"
+          >
+            {{ incident.status }}
+          </span>
+        </div>
+
+        <dl class="detail-grid">
+          <div>
+            <dt>Root cause</dt>
+            <dd>{{ incident.rootCause }}</dd>
+          </div>
+
+          <div>
+            <dt>Severity</dt>
+            <dd>{{ incident.severityScore }}/5</dd>
+          </div>
+
+          <div>
+            <dt>Confidence</dt>
+            <dd>{{ confidencePercent(incident.confidenceScore) }}</dd>
+          </div>
+
+          <div>
+            <dt>Occurrences</dt>
+            <dd>{{ incident.occurrenceCount }}</dd>
+          </div>
+
+          <div>
+            <dt>First seen</dt>
+            <dd>{{ formatDate(incident.firstSeen) }}</dd>
+          </div>
+
+          <div>
+            <dt>Last seen</dt>
+            <dd>{{ formatDate(incident.lastSeen) }}</dd>
+          </div>
+        </dl>
+
+        @if (incident.rootCauseSummary) {
+          <p class="summary-text">
+            {{ incident.rootCauseSummary }}
+          </p>
+        }
+
+        @if (incident.uploadId) {
+          <a
+            class="detail-link"
+            [routerLink]="['/analysis', incident.uploadId]"
+          >
+            Open analysis
+          </a>
+        }
+
+        <section class="status-panel">
+          <h3>Update status</h3>
+
+          @if (incidentStore.allowedStatuses().length === 0) {
+            <p class="muted-text">This incident is terminal.</p>
+          } @else {
+            <label>
+              <span>Next status</span>
+              <select
+                [ngModel]="selectedNextStatus()"
+                (ngModelChange)="updateNextStatus($event)"
+              >
+                <option value="">Choose status</option>
+                @for (status of incidentStore.allowedStatuses(); track status) {
+                  <option [value]="status">
+                    {{ status }}
+                  </option>
+                }
+              </select>
+            </label>
+
+            <label>
+              <span>Note</span>
+              <textarea
+                rows="3"
+                maxlength="500"
+                [ngModel]="note()"
+                (ngModelChange)="updateNote($event)"
+                placeholder="Optional investigation note"
+              ></textarea>
+            </label>
+
+            <button
+              type="button"
+              class="primary-button"
+              (click)="saveStatus()"
+              [disabled]="incidentStore.updating() || !selectedNextStatus()"
+            >
+              @if (incidentStore.updating()) {
+                Updating...
+              } @else {
+                Update incident
+              }
+            </button>
+          }
+        </section>
+
+        <section class="history-panel">
+          <h3>Status history</h3>
+
+          @if (incidentStore.historyLoading()) {
+            <div class="empty-state">Loading history...</div>
+          } @else if (!incidentStore.history().length) {
+            <div class="empty-state">No status history yet.</div>
+          } @else {
+            <div class="timeline">
+              @for (entry of incidentStore.history(); track trackByHistory($index, entry)) {
+                <div class="timeline-item">
+                  <span class="timeline-dot"></span>
+                  <div>
+                    <strong>
+                      {{ entry.fromStatus || 'CREATED' }} -> {{ entry.toStatus }}
+                    </strong>
+                    <small>{{ formatDate(entry.changedAt) }}</small>
+                    @if (entry.note) {
+                      <p>{{ entry.note }}</p>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </section>
+      }
+
+    </aside>
+
+  </main>
+
+</div>

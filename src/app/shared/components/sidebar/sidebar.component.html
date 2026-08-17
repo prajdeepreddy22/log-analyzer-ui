@@ -66,6 +66,17 @@
       Uploads
     </a>
 
+
+    <a
+      routerLink="/incidents"
+      routerLinkActive="active"
+      [routerLinkActiveOptions]="{ exact: false }"
+      class="nav-item"
+      (click)="layoutStore.closeMobileDrawer()"
+    >
+      <span class="nav-dot amber"></span>
+      Incidents
+    </a>
   </nav>
 
   <nav

@@ -23,6 +23,7 @@ import { ChatStoreService } from '../stores/chat-store.service';
 import { AnalysisStoreService } from '../stores/analysis-store.service';
 import { UploadStoreService } from '../stores/upload-store.service';
 import { LogStoreService } from '../stores/log-store.service';
+import { IncidentStoreService } from '../stores/incident-store.service';
 import { ChatStreamingService } from './chat-streaming.service';
 import { RealtimeEventStoreService } from '../stores/realtime-event-store.service';
 import { RealtimeUiSyncService } from './realtime-ui-sync.service';
@@ -41,6 +42,7 @@ export class AuthService {
   private readonly analysisStore = inject(AnalysisStoreService);
   private readonly uploadStore = inject(UploadStoreService);
   private readonly logStore = inject(LogStoreService);
+  private readonly incidentStore = inject(IncidentStoreService);
   private readonly chatStreaming = inject(ChatStreamingService);
   private readonly realtimeEvents = inject(RealtimeEventStoreService);
   private readonly realtimeUiSync = inject(RealtimeUiSyncService);
@@ -186,6 +188,7 @@ export class AuthService {
     this.analysisStore.reset();
     this.uploadStore.reset();
     this.logStore.reset();
+    this.incidentStore.reset();
     this.chatStreaming.closeAll();
     this.realtimeEvents.reset();
     this.realtimeUiSync.reset();

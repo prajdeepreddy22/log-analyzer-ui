@@ -7,6 +7,7 @@ import {
 } from '@angular/core';
 
 import { AnalysisStoreService } from '../stores/analysis-store.service';
+import { IncidentStoreService } from '../stores/incident-store.service';
 import { LogSourceStoreService } from '../stores/log-source-store.service';
 import { RateLimitStoreService } from '../stores/rate-limit-store.service';
 import { RealtimeEventStoreService } from '../stores/realtime-event-store.service';
@@ -31,6 +32,9 @@ export class RealtimeUiSyncService {
 
   private readonly logSourceStore =
     inject(LogSourceStoreService);
+
+  private readonly incidentStore =
+    inject(IncidentStoreService);
 
   private readonly liveLogCount =
     signal(0);
@@ -152,11 +156,12 @@ export class RealtimeUiSyncService {
       this.lastIncidentChangedTimestamp =
         event.timestamp;
 
-      queueMicrotask(() =>
+      queueMicrotask(() => {
         this.latestMessage.set(
           `Incident ${event.data.toStatus.toLowerCase()}`
-        )
-      );
+        );
+        this.incidentStore.refreshCurrentView();
+      });
     });
   }
 

@@ -131,6 +131,20 @@ export const routes: Routes = [
       },
 
       // =====================
+      // =====================
+      // INCIDENTS
+      // =====================
+
+      {
+        path: 'incidents',
+
+        loadComponent: () =>
+          import(
+            './features/incidents/pages/incidents-page/incidents-page.component'
+          ).then(
+            m => m.IncidentsPageComponent
+          )
+      },
       // CHAT
       // =====================
 
