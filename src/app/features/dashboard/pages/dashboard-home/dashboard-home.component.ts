@@ -14,6 +14,8 @@ import { UploadApiService } from '../../../../core/api/upload-api.service';
 import { UploadResponseModel } from '../../../../core/models/upload/upload-response.model';
 import { AnalysisStoreService } from '../../../../core/stores/analysis-store.service';
 import { RateLimitStoreService } from '../../../../core/stores/rate-limit-store.service';
+import { RealtimeEventStoreService } from '../../../../core/stores/realtime-event-store.service';
+import { RealtimeUiSyncService } from '../../../../core/services/realtime-ui-sync.service';
 import { formatFileSize } from '../../../../core/utils/file-size.util';
 
 @Component({
@@ -44,6 +46,12 @@ export class DashboardHomeComponent
 
   readonly rateLimitStore =
     inject(RateLimitStoreService);
+
+  readonly realtimeEvents =
+    inject(RealtimeEventStoreService);
+
+  readonly realtimeUiSync =
+    inject(RealtimeUiSyncService);
 
   readonly uploads =
     signal<UploadResponseModel[]>([]);

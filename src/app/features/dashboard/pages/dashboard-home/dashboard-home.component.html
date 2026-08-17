@@ -38,6 +38,40 @@
 
   </div>
 
+  <section class="section live-activity-band">
+
+    <div>
+
+      <span class="live-label">
+        REALTIME
+      </span>
+
+      <h2>
+        {{ realtimeEvents.connectionLabel() }} activity stream
+      </h2>
+
+      <p>
+        {{ realtimeUiSync.liveMessage() || 'Waiting for live ingestion, analysis, and incident updates.' }}
+      </p>
+
+    </div>
+
+    <div class="live-metrics">
+
+      <div>
+        <strong>{{ realtimeUiSync.newLiveLogCount() }}</strong>
+        <span>new live logs</span>
+      </div>
+
+      <div>
+        <strong>{{ rateLimitStore.status()?.blocked ? 'BLOCKED' : 'READY' }}</strong>
+        <span>AI quota state</span>
+      </div>
+
+    </div>
+
+  </section>
+
   @if (loading()) {
 
     <div class="metrics-grid">

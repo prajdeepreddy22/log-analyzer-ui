@@ -19,6 +19,7 @@ import { LogStoreService } from '../../../../core/stores/log-store.service';
 import { AnalysisStoreService } from '../../../../core/stores/analysis-store.service';
 
 import { UploadStoreService } from '../../../../core/stores/upload-store.service';
+import { RealtimeUiSyncService } from '../../../../core/services/realtime-ui-sync.service';
 
 import { LogToolbarComponent } from '../../components/log-toolbar/log-toolbar.component';
 
@@ -71,6 +72,9 @@ export class LogViewerPageComponent
 
   private readonly uploadStore =
     inject(UploadStoreService);
+
+  readonly realtimeUiSync =
+    inject(RealtimeUiSyncService);
 
   uploadId = '';
 
@@ -127,6 +131,29 @@ export class LogViewerPageComponent
         this.uploadId
       );
     }
+  }
+
+  refreshLiveLogs(): void {
+
+    if (this.uploadId) {
+
+      if (this.hasActiveSearch()) {
+        this.logStore.searchLogs(
+          this.uploadId
+        );
+      } else {
+        this.logStore.loadLogs(
+          this.uploadId
+        );
+      }
+
+      this.logStore.loadStats(
+        this.uploadId
+      );
+    }
+
+    this.uploadStore.loadUploads();
+    this.realtimeUiSync.clearLiveLogBadge();
   }
 
   ngOnDestroy(): void {

@@ -8,6 +8,29 @@
     [uploadId]="uploadId"
   />
 
+  @if (realtimeUiSync.hasNewLiveLogs()) {
+
+    <div class="live-refresh-banner">
+
+      <div>
+        <strong>
+          {{ realtimeUiSync.newLiveLogCount() }} new live logs ingested
+        </strong>
+
+        <span>
+          Refresh this view to pull the latest stored entries and stats.
+        </span>
+      </div>
+
+      <button
+        type="button"
+        (click)="refreshLiveLogs()"
+      >
+        Refresh
+      </button>
+
+    </div>
+  }
   <!-- ===================== -->
   <!-- STATS -->
   <!-- ===================== -->
