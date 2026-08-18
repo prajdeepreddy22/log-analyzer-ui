@@ -103,18 +103,23 @@ export class IncidentStoreService {
       )
       .subscribe({
         next: response => {
-          this.incidents.set(response.content);
-          this.page.set(response.page);
-          this.size.set(response.size);
-          this.totalElements.set(response.totalElements);
-          this.totalPages.set(response.totalPages);
+          const incidents =
+            Array.isArray(response?.content)
+              ? response.content
+              : [];
+
+          this.incidents.set(incidents);
+          this.page.set(response?.page ?? 0);
+          this.size.set(response?.size ?? this.size());
+          this.totalElements.set(response?.totalElements ?? 0);
+          this.totalPages.set(response?.totalPages ?? 0);
 
           const selectedId =
             this.selectedIncident()?.incidentId;
 
           if (selectedId) {
             const updatedSelection =
-              response.content.find(incident =>
+              incidents.find(incident =>
                 incident.incidentId === selectedId
               );
 

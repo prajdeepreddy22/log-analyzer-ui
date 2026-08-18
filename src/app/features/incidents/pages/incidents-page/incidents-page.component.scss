@@ -191,8 +191,8 @@ textarea:focus {
 
 .incident-row {
   display: grid;
-  grid-template-columns: minmax(230px, 1.4fr) 140px 105px 105px 95px 150px;
-  gap: 12px;
+  grid-template-columns: minmax(180px, 1fr) 108px 78px 88px 100px;
+  column-gap: 10px;
   align-items: center;
   width: 100%;
   min-height: 58px;
@@ -204,6 +204,15 @@ textarea:focus {
   font: inherit;
   font-size: 13px;
   text-align: left;
+  min-width: 0;
+}
+
+.incident-row > span {
+  min-width: 0;
+}
+
+.incident-row > span:not(:first-child) {
+  white-space: nowrap;
 }
 
 .incident-row:last-child {
@@ -253,6 +262,7 @@ textarea:focus {
 }
 
 .detail-grid div {
+  min-width: 0;
   padding: 12px;
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -272,7 +282,8 @@ dd {
   color: var(--text);
   font-size: 13px;
   font-weight: 700;
-  word-break: break-word;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
 }
 
 .summary-text,
@@ -409,14 +420,6 @@ button:disabled {
   .incident-detail-panel {
     border-left: 0;
   }
-
-  .incident-table {
-    overflow-x: auto;
-  }
-
-  .incident-row {
-    min-width: 860px;
-  }
 }
 
 @media (max-width: 720px) {
@@ -445,5 +448,13 @@ button:disabled {
 
   .detail-grid {
     grid-template-columns: 1fr;
+  }
+
+  .incident-table {
+    overflow-x: auto;
+  }
+
+  .incident-row {
+    min-width: 640px;
   }
 }

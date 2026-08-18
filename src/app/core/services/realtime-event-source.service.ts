@@ -30,14 +30,23 @@ export class RealtimeStreamError extends Error {
 })
 export class RealtimeEventSourceService {
 
+  private static readonly reconnectDelayMs = 3_000;
+
   private readonly authStore =
     inject(AuthStoreService);
 
   private activeSource:
     EventSource | null = null;
 
+  private reconnectTimer:
+    ReturnType<typeof setTimeout> | null = null;
+
+  private explicitlyClosed = false;
+
   close(): void {
 
+    this.explicitlyClosed = true;
+    this.clearReconnectTimer();
     this.activeSource?.close();
     this.activeSource = null;
   }
@@ -45,6 +54,7 @@ export class RealtimeEventSourceService {
   connect(): Observable<RealtimeEventModel> {
 
     this.close();
+    this.explicitlyClosed = false;
 
     return new Observable<RealtimeEventModel>(
       observer => {
@@ -62,16 +72,6 @@ export class RealtimeEventSourceService {
           return undefined;
         }
 
-        const params =
-          new URLSearchParams({ token });
-
-        const source =
-          new EventSource(
-            `${environment.apiBaseUrl}/events/stream?${params.toString()}`
-          );
-
-        this.activeSource = source;
-
         let closed = false;
 
         const closeSource = (): void => {
@@ -87,6 +87,48 @@ export class RealtimeEventSourceService {
           }
 
           source.close();
+        };
+
+        let source: EventSource;
+
+        const openSource = (): void => {
+
+          if (closed || this.explicitlyClosed) {
+            return;
+          }
+
+          const params =
+            new URLSearchParams({ token });
+
+          source =
+            new EventSource(
+              `${environment.apiBaseUrl}/events/stream?${params.toString()}`
+            );
+
+          this.activeSource = source;
+
+          this.eventTypes().forEach(type => {
+            source.addEventListener(
+              type,
+              event =>
+                handleEvent(event as MessageEvent<string>)
+            );
+          });
+
+          source.onerror = () => {
+
+            if (closed || this.explicitlyClosed) {
+              return;
+            }
+
+            source.close();
+
+            if (this.activeSource === source) {
+              this.activeSource = null;
+            }
+
+            this.scheduleReconnect(openSource);
+          };
         };
 
         const handleEvent = (
@@ -107,34 +149,38 @@ export class RealtimeEventSourceService {
           }
         };
 
-        this.eventTypes().forEach(type => {
-          source.addEventListener(
-            type,
-            event =>
-              handleEvent(event as MessageEvent<string>)
-          );
-        });
-
-        source.onerror = () => {
-
-          if (source.readyState === EventSource.CLOSED) {
-            closeSource();
-            return;
-          }
-
-          observer.error(
-            new RealtimeStreamError(
-              'Realtime connection failed. It will reconnect when refreshed.'
-            )
-          );
-          closeSource();
-        };
+        openSource();
 
         return () => {
           closeSource();
         };
       }
     );
+  }
+
+  private scheduleReconnect(
+    reconnect: () => void
+  ): void {
+
+    if (this.reconnectTimer || this.explicitlyClosed) {
+      return;
+    }
+
+    this.reconnectTimer =
+      setTimeout(() => {
+        this.reconnectTimer = null;
+        reconnect();
+      }, RealtimeEventSourceService.reconnectDelayMs);
+  }
+
+  private clearReconnectTimer(): void {
+
+    if (!this.reconnectTimer) {
+      return;
+    }
+
+    clearTimeout(this.reconnectTimer);
+    this.reconnectTimer = null;
   }
 
   private eventTypes(): RealtimeEventType[] {

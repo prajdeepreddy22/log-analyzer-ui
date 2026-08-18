@@ -116,7 +116,6 @@
             <span>Severity</span>
             <span>Confidence</span>
             <span>Occurrences</span>
-            <span>Last seen</span>
           </div>
 
           @for (incident of incidentStore.incidents(); track trackByIncident($index, incident)) {
@@ -155,7 +154,6 @@
 
               <span>{{ confidencePercent(incident.confidenceScore) }}</span>
               <span>{{ incident.occurrenceCount }}</span>
-              <span>{{ formatDate(incident.lastSeen) }}</span>
             </button>
           }
 
